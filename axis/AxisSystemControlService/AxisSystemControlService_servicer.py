@@ -56,15 +56,18 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
     implementation: Union[AxisSystemControlServiceSimulation, AxisSystemControlServiceReal]
     simulation_mode: bool
 
-    def __init__(self, axis_system, simulation_mode: bool = True):
+    def __init__(self, axis_system, sila2_conf,  simulation_mode: bool = True):
         """
         Class initialiser.
 
         :param axis_system: The axis system that this feature shall operate on
+        :param sila2_conf: The config of the server
         :param simulation_mode: Sets whether at initialisation the simulation mode is active or the real mode.
         """
 
         self.axis_system = axis_system
+        self.sila2_conf = sila2_conf
+
         self.simulation_mode = simulation_mode
         if simulation_mode:
             self.switch_to_simulation_mode()
@@ -93,7 +96,7 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
     def switch_to_real_mode(self):
         """Method that will automatically be called by the server when the real mode is requested."""
         self.simulation_mode = False
-        self._inject_implementation(AxisSystemControlServiceReal(self.axis_system))
+        self._inject_implementation(AxisSystemControlServiceReal(self.axis_system, self.sila2_conf))
 
     def EnableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.EnableAxisSystem_Responses:
@@ -181,14 +184,14 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
         """
         Requests the unobservable property Available Axes
             The names of the individual axes of the axis system.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
 
         :returns: A response object with the following fields:
             AvailableAxes (Available Axes): The names of the individual axes of the axis system.
         """
-    
+
         logging.debug(
             "Property AvailableAxes requested in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -198,7 +201,7 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
             return self.implementation.Get_AvailableAxes(request, context)
         except SiLAError as err:
             err.raise_rpc_error(context=context)
-    
+
     def Subscribe_AxisSystemState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses:
         """

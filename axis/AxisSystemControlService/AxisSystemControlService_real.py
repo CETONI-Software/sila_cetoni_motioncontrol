@@ -36,6 +36,8 @@ import grpc         # used for type hinting only
 
 from typing import Dict
 
+from configparser import ConfigParser, NoSectionError, NoOptionError
+
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 # import SiLA errors
@@ -57,14 +59,17 @@ class AxisSystemControlServiceReal:
         Allows to control motion systems like axis systems
     """
 
-    def __init__(self, axis_system: AxisSystem):
+    def __init__(self, axis_system: AxisSystem, sila2_conf: ConfigParser):
         """
         Class initialiser.
 
         :param axis_system: The axis system that this feature shall operate on
+        :param sila2_conf: The config of the server
         """
 
         self.axis_system = axis_system
+        self.sila2_conf = sila2_conf
+
         self.axes: Dict[str, Axis] = {
             self.axis_system.get_axis_device(i).get_device_name(): self.axis_system.get_axis_device(i)
             for i in range(self.axis_system.get_axes_count())
@@ -73,6 +78,23 @@ class AxisSystemControlServiceReal:
         self.METADATA_AXIS_IDENTIFIER = 'sila-de.cetoni-motioncontrol.axis-axissystemcontrolservice-v1-metadata-axisidentifier-bin'
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
+
+        self._restore_last_drive_position_counters()
+
+    def _restore_last_drive_position_counters(self):
+        """
+        Reads the last drive position counters from the server's config file.
+        """
+        for axis_name in self.axes.keys():
+            try:
+                drive_pos_counter = int(self.sila2_conf[axis_name]["drive_pos_counter"])
+                logging.debug("Restoring drive position counter (%d) for %s", drive_pos_counter, axis_name)
+                self.axes[axis_name].restore_position_counter(drive_pos_counter)
+            except NoSectionError as err:
+                logging.error("No section for %s in SiLA2 config file: %s", axis_name, err)
+            except (NoOptionError, KeyError) as err:
+                logging.error("Cannot read config file option in %s", err)
+                logging.error("No drive position counter found! Homing move needed!")
 
     def _get_axis_name(self, invocation_metadata: Dict) -> str:
         """

@@ -86,6 +86,7 @@ class MotionControlServer(QmixIOServer):
         #  Register de.cetoni.motioncontrol.axis.AxisSystemControlService
         self.AxisSystemControlService_servicer = AxisSystemControlService(
             axis_system=axis_system,
+            sila2_conf=self.sila2_config,
             simulation_mode=self.simulation_mode
         )
         AxisSystemControlService_pb2_grpc.add_AxisSystemControlServiceServicer_to_server(
