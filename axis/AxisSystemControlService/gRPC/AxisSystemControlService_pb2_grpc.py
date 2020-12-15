@@ -31,6 +31,11 @@ class AxisSystemControlServiceStub(object):
                 request_serializer=AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.SerializeToString,
                 response_deserializer=AxisSystemControlService__pb2.ClearAxisFaultState_Responses.FromString,
                 )
+        self.Get_AvailableAxes = channel.unary_unary(
+                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Get_AvailableAxes',
+                request_serializer=AxisSystemControlService__pb2.Get_AvailableAxes_Parameters.SerializeToString,
+                response_deserializer=AxisSystemControlService__pb2.Get_AvailableAxes_Responses.FromString,
+                )
         self.Subscribe_AxisSystemState = channel.unary_stream(
                 '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Subscribe_AxisSystemState',
                 request_serializer=AxisSystemControlService__pb2.Subscribe_AxisSystemState_Parameters.SerializeToString,
@@ -78,9 +83,17 @@ class AxisSystemControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Get_AvailableAxes(self, request, context):
+        """Available Axes
+        The names of the individual axes of the axis system.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def Subscribe_AxisSystemState(self, request, context):
         """Axis System State
-        The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the sate is 'Enabled', the axis
+        The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis
         system can move.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -121,6 +134,11 @@ def add_AxisSystemControlServiceServicer_to_server(servicer, server):
                     servicer.ClearAxisFaultState,
                     request_deserializer=AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.FromString,
                     response_serializer=AxisSystemControlService__pb2.ClearAxisFaultState_Responses.SerializeToString,
+            ),
+            'Get_AvailableAxes': grpc.unary_unary_rpc_method_handler(
+                    servicer.Get_AvailableAxes,
+                    request_deserializer=AxisSystemControlService__pb2.Get_AvailableAxes_Parameters.FromString,
+                    response_serializer=AxisSystemControlService__pb2.Get_AvailableAxes_Responses.SerializeToString,
             ),
             'Subscribe_AxisSystemState': grpc.unary_stream_rpc_method_handler(
                     servicer.Subscribe_AxisSystemState,
@@ -197,6 +215,23 @@ class AxisSystemControlService(object):
         return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/ClearAxisFaultState',
             AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.SerializeToString,
             AxisSystemControlService__pb2.ClearAxisFaultState_Responses.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Get_AvailableAxes(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Get_AvailableAxes',
+            AxisSystemControlService__pb2.Get_AvailableAxes_Parameters.SerializeToString,
+            AxisSystemControlService__pb2.Get_AvailableAxes_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

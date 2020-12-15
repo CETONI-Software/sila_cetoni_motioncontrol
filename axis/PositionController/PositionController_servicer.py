@@ -37,7 +37,7 @@ from typing import Union
 
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
-from sila2lib.error_handling.server_err import SiLAError
+from impl.common.qmix_errors import QmixSDKSiLAError, SiLAError, DeviceError
 
 # import gRPC modules for this feature
 from .gRPC import PositionController_pb2 as PositionController_pb2
@@ -55,13 +55,15 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
     implementation: Union[PositionControllerSimulation, PositionControllerReal]
     simulation_mode: bool
 
-    def __init__(self, simulation_mode: bool = True):
+    def __init__(self, axis_system, simulation_mode: bool = True):
         """
         Class initialiser.
 
+        :param axis_system: The axis system that this feature shall operate on
         :param simulation_mode: Sets whether at initialisation the simulation mode is active or the real mode.
         """
 
+        self.axis_system = axis_system
         self.simulation_mode = simulation_mode
         if simulation_mode:
             self.switch_to_simulation_mode()
@@ -90,24 +92,24 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
     def switch_to_real_mode(self):
         """Method that will automatically be called by the server when the real mode is requested."""
         self.simulation_mode = False
-        self._inject_implementation(PositionControllerReal())
+        self._inject_implementation(PositionControllerReal(self.axis_system))
 
     def MoveToPosition(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.CommandConfirmation:
         """
         Executes the observable command "Move To Position"
             Move the axis system to the given position with a certain velocity
-    
+
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to
             request.Velocity (Velocity): A real value between 0 (exclusive) and 1 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 1 means, all axes travel with their maximum velocity. A value of 0.5 means, all axes travel with the half of the maximum velocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A command confirmation object with the following information:
             commandId: A command id with which this observable command can be referenced in future calls
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
-    
+
         logging.debug(
             "MoveToPosition called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -115,25 +117,27 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
         )
         try:
             return self.implementation.MoveToPosition(request, context)
-        except SiLAError as err:
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
+
     def MoveToPosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
         """
         Returns execution information regarding the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: An ExecutionInfo response stream for the command with the following fields:
             commandStatus: Status of the command (enumeration)
             progressInfo: Information on the progress of the command (0 to 1)
             estimatedRemainingTime: Estimate of the remaining time required to run the command
             updatedLifetimeOfExecution: An update on the execution lifetime
         """
-    
+
         logging.debug(
             "MoveToPosition_Info called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -141,22 +145,24 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
         )
         try:
             return self.implementation.MoveToPosition_Info(request, context)
-        except SiLAError as err:
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
+
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
             -> PositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "MoveToPosition_Result called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -166,22 +172,22 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             return self.implementation.MoveToPosition_Result(request, context)
         except SiLAError as err:
             err.raise_rpc_error(context=context)
-    
-    
+
+
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
             -> PositionController_pb2.MoveToHomePosition_Responses:
         """
         Executes the unobservable command "Move To Home Position"
             Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axis into a home state.
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "MoveToHomePosition called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -189,79 +195,31 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
         )
         try:
             return self.implementation.MoveToHomePosition(request, context)
-        except SiLAError as err:
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
-    def MoveToHomePosition_Info(self, request, context: grpc.ServicerContext) \
-            -> silaFW_pb2.ExecutionInfo:
-        """
-        Returns execution information regarding the command call :meth:`~.MoveToHomePosition`.
-    
-        :param request: A request object with the following properties
-            CommandExecutionUUID: The UUID of the command executed.
-        :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
-        :returns: An ExecutionInfo response stream for the command with the following fields:
-            commandStatus: Status of the command (enumeration)
-            progressInfo: Information on the progress of the command (0 to 1)
-            estimatedRemainingTime: Estimate of the remaining time required to run the command
-            updatedLifetimeOfExecution: An update on the execution lifetime
-        """
-    
-        logging.debug(
-            "MoveToHomePosition_Info called in {current_mode} mode".format(
-                current_mode=('simulation' if self.simulation_mode else 'real')
-            )
-        )
-        try:
-            return self.implementation.MoveToHomePosition_Info(request, context)
-        except SiLAError as err:
-            err.raise_rpc_error(context=context)
-    
-    def MoveToHomePosition_Result(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToHomePosition_Responses:
-        """
-        Returns the final result of the command call :meth:`~.MoveToHomePosition`.
-    
-        :param request: A request object with the following properties
-            CommandExecutionUUID: The UUID of the command executed.
-        :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
-        :returns: The return object defined for the command with the following fields:
-            EmptyResponse (Empty Response): An empty response data type used if no response is required.
-        """
-    
-        logging.debug(
-            "MoveToHomePosition_Result called in {current_mode} mode".format(
-                current_mode=('simulation' if self.simulation_mode else 'real')
-            )
-        )
-        try:
-            return self.implementation.MoveToHomePosition_Result(request, context)
-        except SiLAError as err:
-            err.raise_rpc_error(context=context)
-    
-    
+
     def StopMoving(self, request, context: grpc.ServicerContext) \
             -> PositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops all movement of the axis system
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "StopMoving called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
-    
+
         try:
             return self.implementation.StopMoving(request, context)
         except SiLAError as err:
@@ -272,14 +230,14 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
         """
         Requests the observable property Position
             The current XY position of the axis system
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response stream with the following fields:
             Position (Position): The current XY position of the axis system
         """
-    
+
         logging.debug(
             "Property Position requested in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
@@ -289,6 +247,6 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             return self.implementation.Subscribe_Position(request, context)
         except SiLAError as err:
             err.raise_rpc_error(context=context)
-    
 
-    
+
+

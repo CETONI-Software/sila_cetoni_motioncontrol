@@ -37,7 +37,8 @@ from typing import Union
 
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
-from sila2lib.error_handling.server_err import SiLAError
+# import SiLA errors
+from impl.common.qmix_errors import SiLAError, DeviceError, QmixSDKSiLAError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemControlService_pb2 as AxisSystemControlService_pb2
@@ -55,13 +56,15 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
     implementation: Union[AxisSystemControlServiceSimulation, AxisSystemControlServiceReal]
     simulation_mode: bool
 
-    def __init__(self, simulation_mode: bool = True):
+    def __init__(self, axis_system, simulation_mode: bool = True):
         """
         Class initialiser.
 
+        :param axis_system: The axis system that this feature shall operate on
         :param simulation_mode: Sets whether at initialisation the simulation mode is active or the real mode.
         """
 
+        self.axis_system = axis_system
         self.simulation_mode = simulation_mode
         if simulation_mode:
             self.switch_to_simulation_mode()
@@ -90,80 +93,88 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
     def switch_to_real_mode(self):
         """Method that will automatically be called by the server when the real mode is requested."""
         self.simulation_mode = False
-        self._inject_implementation(AxisSystemControlServiceReal())
+        self._inject_implementation(AxisSystemControlServiceReal(self.axis_system))
 
     def EnableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.EnableAxisSystem_Responses:
         """
         Executes the unobservable command "Enable Axis System"
             Set all axes of the axis system into enabled state
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "EnableAxisSystem called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
-    
+
         try:
             return self.implementation.EnableAxisSystem(request, context)
-        except SiLAError as err:
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
+
     def DisableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.DisableAxisSystem_Responses:
         """
         Executes the unobservable command "Disable Axis System"
             Set all axes of the axis system into disabled state
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "DisableAxisSystem called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
-    
+
         try:
             return self.implementation.DisableAxisSystem(request, context)
-        except SiLAError as err:
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
+
     def ClearAxisFaultState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.ClearAxisFaultState_Responses:
         """
         Executes the unobservable command "Clear Axis Fault State"
             Clears the fault condition of a single axis. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state.
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         logging.debug(
             "ClearAxisFaultState called in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
-    
+
         try:
             return self.implementation.ClearAxisFaultState(request, context)
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
+            err.raise_rpc_error(context=context)
 
     def Get_AvailableAxes(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Get_AvailableAxes_Responses:
@@ -187,68 +198,74 @@ class AxisSystemControlService(AxisSystemControlService_pb2_grpc.AxisSystemContr
             return self.implementation.Get_AvailableAxes(request, context)
         except SiLAError as err:
             err.raise_rpc_error(context=context)
-
+    
     def Subscribe_AxisSystemState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses:
         """
         Requests the observable property Axis System State
             The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the sate is 'Enabled', the axis system can move.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response stream with the following fields:
             AxisSystemState (Axis System State): The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the sate is 'Enabled', the axis system can move.
         """
-    
+
         logging.debug(
             "Property AxisSystemState requested in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
         try:
-            return self.implementation.Subscribe_AxisSystemState(request, context)
-        except SiLAError as err:
+            for value in self.implementation.Subscribe_AxisSystemState(request, context):
+                yield value
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
-    
+
+
     def Subscribe_AxisFaultState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses:
         """
         Requests the observable property Axis Fault State
             Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response stream with the following fields:
             AxisFaultState (Axis Fault State): Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
         """
-    
+
         logging.debug(
             "Property AxisFaultState requested in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')
             )
         )
         try:
-            return self.implementation.Subscribe_AxisFaultState(request, context)
-        except SiLAError as err:
+            for value in self.implementation.Subscribe_AxisFaultState(request, context):
+                yield value
+        except (SiLAError, DeviceError) as err:
+            if isinstance(err, DeviceError):
+                err = QmixSDKSiLAError(err)
             err.raise_rpc_error(context=context)
-    
+
 
     def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
         """
         Requests the unobservable property FCPAffectedByMetadata Axis Identifier
             Specifies which Features/Commands/Properties of the SiLA server are affected by the Axis Identifier Metadata.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AffectedCalls (AffectedCalls): A string containing a list of Fully Qualified Identifiers of Features, Commands and Properties for which the SiLA Client Metadata is expected as part of the respective RPCs.
         """
-    
+
         logging.debug(
             "Property FCPAffectedByMetadata_AxisIdentifier requested in {current_mode} mode".format(
                 current_mode=('simulation' if self.simulation_mode else 'real')

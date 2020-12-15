@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1e\x41xisSystemControlService.proto\x12>sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1\x1a\x13SiLAFramework.proto\"\x1d\n\x1b\x45nableAxisSystem_Parameters\"\x1c\n\x1a\x45nableAxisSystem_Responses\"\x1e\n\x1c\x44isableAxisSystem_Parameters\"\x1d\n\x1b\x44isableAxisSystem_Responses\" \n\x1e\x43learAxisFaultState_Parameters\"\x1f\n\x1d\x43learAxisFaultState_Responses\"&\n$Subscribe_AxisSystemState_Parameters\"^\n#Subscribe_AxisSystemState_Responses\x12\x37\n\x0f\x41xisSystemState\x18\x01 \x01(\x0b\x32\x1e.sila2.org.silastandard.String\"%\n#Subscribe_AxisFaultState_Parameters\"]\n\"Subscribe_AxisFaultState_Responses\x12\x37\n\x0e\x41xisFaultState\x18\x01 \x01(\x0b\x32\x1f.sila2.org.silastandard.Boolean\"5\n3Get_FCPAffectedByMetadata_AxisIdentifier_Parameters\"k\n2Get_FCPAffectedByMetadata_AxisIdentifier_Responses\x12\x35\n\rAffectedCalls\x18\x01 \x03(\x0b\x32\x1e.sila2.org.silastandard.String\"Q\n\x17Metadata_AxisIdentifier\x12\x36\n\x0e\x41xisIdentifier\x18\x01 \x01(\x0b\x32\x1e.sila2.org.silastandard.String2\x85\x0b\n\x18\x41xisSystemControlService\x12\xcd\x01\n\x10\x45nableAxisSystem\x12[.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Parameters\x1aZ.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Responses\"\x00\x12\xd0\x01\n\x11\x44isableAxisSystem\x12\\.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Parameters\x1a[.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Responses\"\x00\x12\xd6\x01\n\x13\x43learAxisFaultState\x12^.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearAxisFaultState_Parameters\x1a].sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearAxisFaultState_Responses\"\x00\x12\xea\x01\n\x19Subscribe_AxisSystemState\x12\x64.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Parameters\x1a\x63.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Responses\"\x00\x30\x01\x12\xe7\x01\n\x18Subscribe_AxisFaultState\x12\x63.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisFaultState_Parameters\x1a\x62.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisFaultState_Responses\"\x00\x30\x01\x12\x95\x02\n(Get_FCPAffectedByMetadata_AxisIdentifier\x12s.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters\x1ar.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_FCPAffectedByMetadata_AxisIdentifier_Responses\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x1e\x41xisSystemControlService.proto\x12>sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1\x1a\x13SiLAFramework.proto\"\x1d\n\x1b\x45nableAxisSystem_Parameters\"\x1c\n\x1a\x45nableAxisSystem_Responses\"\x1e\n\x1c\x44isableAxisSystem_Parameters\"\x1d\n\x1b\x44isableAxisSystem_Responses\" \n\x1e\x43learAxisFaultState_Parameters\"\x1f\n\x1d\x43learAxisFaultState_Responses\"\x1e\n\x1cGet_AvailableAxes_Parameters\"T\n\x1bGet_AvailableAxes_Responses\x12\x35\n\rAvailableAxes\x18\x01 \x03(\x0b\x32\x1e.sila2.org.silastandard.String\"&\n$Subscribe_AxisSystemState_Parameters\"^\n#Subscribe_AxisSystemState_Responses\x12\x37\n\x0f\x41xisSystemState\x18\x01 \x01(\x0b\x32\x1e.sila2.org.silastandard.String\"%\n#Subscribe_AxisFaultState_Parameters\"]\n\"Subscribe_AxisFaultState_Responses\x12\x37\n\x0e\x41xisFaultState\x18\x01 \x01(\x0b\x32\x1f.sila2.org.silastandard.Boolean\"5\n3Get_FCPAffectedByMetadata_AxisIdentifier_Parameters\"k\n2Get_FCPAffectedByMetadata_AxisIdentifier_Responses\x12\x35\n\rAffectedCalls\x18\x01 \x03(\x0b\x32\x1e.sila2.org.silastandard.String\"Q\n\x17Metadata_AxisIdentifier\x12\x36\n\x0e\x41xisIdentifier\x18\x01 \x01(\x0b\x32\x1e.sila2.org.silastandard.String2\xd8\x0c\n\x18\x41xisSystemControlService\x12\xcd\x01\n\x10\x45nableAxisSystem\x12[.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Parameters\x1aZ.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Responses\"\x00\x12\xd0\x01\n\x11\x44isableAxisSystem\x12\\.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Parameters\x1a[.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Responses\"\x00\x12\xd6\x01\n\x13\x43learAxisFaultState\x12^.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearAxisFaultState_Parameters\x1a].sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearAxisFaultState_Responses\"\x00\x12\xd0\x01\n\x11Get_AvailableAxes\x12\\.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Parameters\x1a[.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Responses\"\x00\x12\xea\x01\n\x19Subscribe_AxisSystemState\x12\x64.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Parameters\x1a\x63.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Responses\"\x00\x30\x01\x12\xe7\x01\n\x18Subscribe_AxisFaultState\x12\x63.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisFaultState_Parameters\x1a\x62.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisFaultState_Responses\"\x00\x30\x01\x12\x95\x02\n(Get_FCPAffectedByMetadata_AxisIdentifier\x12s.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters\x1ar.sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_FCPAffectedByMetadata_AxisIdentifier_Responses\"\x00\x62\x06proto3'
   ,
   dependencies=[SiLAFramework__pb2.DESCRIPTOR,])
 
@@ -177,6 +177,63 @@ _CLEARAXISFAULTSTATE_RESPONSES = _descriptor.Descriptor(
 )
 
 
+_GET_AVAILABLEAXES_PARAMETERS = _descriptor.Descriptor(
+  name='Get_AvailableAxes_Parameters',
+  full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Parameters',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=310,
+  serialized_end=340,
+)
+
+
+_GET_AVAILABLEAXES_RESPONSES = _descriptor.Descriptor(
+  name='Get_AvailableAxes_Responses',
+  full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Responses',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='AvailableAxes', full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Responses.AvailableAxes', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=342,
+  serialized_end=426,
+)
+
+
 _SUBSCRIBE_AXISSYSTEMSTATE_PARAMETERS = _descriptor.Descriptor(
   name='Subscribe_AxisSystemState_Parameters',
   full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Parameters',
@@ -197,8 +254,8 @@ _SUBSCRIBE_AXISSYSTEMSTATE_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=310,
-  serialized_end=348,
+  serialized_start=428,
+  serialized_end=466,
 )
 
 
@@ -229,8 +286,8 @@ _SUBSCRIBE_AXISSYSTEMSTATE_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=350,
-  serialized_end=444,
+  serialized_start=468,
+  serialized_end=562,
 )
 
 
@@ -254,8 +311,8 @@ _SUBSCRIBE_AXISFAULTSTATE_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=446,
-  serialized_end=483,
+  serialized_start=564,
+  serialized_end=601,
 )
 
 
@@ -286,8 +343,8 @@ _SUBSCRIBE_AXISFAULTSTATE_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=485,
-  serialized_end=578,
+  serialized_start=603,
+  serialized_end=696,
 )
 
 
@@ -311,8 +368,8 @@ _GET_FCPAFFECTEDBYMETADATA_AXISIDENTIFIER_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=580,
-  serialized_end=633,
+  serialized_start=698,
+  serialized_end=751,
 )
 
 
@@ -343,8 +400,8 @@ _GET_FCPAFFECTEDBYMETADATA_AXISIDENTIFIER_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=635,
-  serialized_end=742,
+  serialized_start=753,
+  serialized_end=860,
 )
 
 
@@ -375,10 +432,11 @@ _METADATA_AXISIDENTIFIER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=744,
-  serialized_end=825,
+  serialized_start=862,
+  serialized_end=943,
 )
 
+_GET_AVAILABLEAXES_RESPONSES.fields_by_name['AvailableAxes'].message_type = SiLAFramework__pb2._STRING
 _SUBSCRIBE_AXISSYSTEMSTATE_RESPONSES.fields_by_name['AxisSystemState'].message_type = SiLAFramework__pb2._STRING
 _SUBSCRIBE_AXISFAULTSTATE_RESPONSES.fields_by_name['AxisFaultState'].message_type = SiLAFramework__pb2._BOOLEAN
 _GET_FCPAFFECTEDBYMETADATA_AXISIDENTIFIER_RESPONSES.fields_by_name['AffectedCalls'].message_type = SiLAFramework__pb2._STRING
@@ -389,6 +447,8 @@ DESCRIPTOR.message_types_by_name['DisableAxisSystem_Parameters'] = _DISABLEAXISS
 DESCRIPTOR.message_types_by_name['DisableAxisSystem_Responses'] = _DISABLEAXISSYSTEM_RESPONSES
 DESCRIPTOR.message_types_by_name['ClearAxisFaultState_Parameters'] = _CLEARAXISFAULTSTATE_PARAMETERS
 DESCRIPTOR.message_types_by_name['ClearAxisFaultState_Responses'] = _CLEARAXISFAULTSTATE_RESPONSES
+DESCRIPTOR.message_types_by_name['Get_AvailableAxes_Parameters'] = _GET_AVAILABLEAXES_PARAMETERS
+DESCRIPTOR.message_types_by_name['Get_AvailableAxes_Responses'] = _GET_AVAILABLEAXES_RESPONSES
 DESCRIPTOR.message_types_by_name['Subscribe_AxisSystemState_Parameters'] = _SUBSCRIBE_AXISSYSTEMSTATE_PARAMETERS
 DESCRIPTOR.message_types_by_name['Subscribe_AxisSystemState_Responses'] = _SUBSCRIBE_AXISSYSTEMSTATE_RESPONSES
 DESCRIPTOR.message_types_by_name['Subscribe_AxisFaultState_Parameters'] = _SUBSCRIBE_AXISFAULTSTATE_PARAMETERS
@@ -439,6 +499,20 @@ ClearAxisFaultState_Responses = _reflection.GeneratedProtocolMessageType('ClearA
   # @@protoc_insertion_point(class_scope:sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearAxisFaultState_Responses)
   })
 _sym_db.RegisterMessage(ClearAxisFaultState_Responses)
+
+Get_AvailableAxes_Parameters = _reflection.GeneratedProtocolMessageType('Get_AvailableAxes_Parameters', (_message.Message,), {
+  'DESCRIPTOR' : _GET_AVAILABLEAXES_PARAMETERS,
+  '__module__' : 'AxisSystemControlService_pb2'
+  # @@protoc_insertion_point(class_scope:sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Parameters)
+  })
+_sym_db.RegisterMessage(Get_AvailableAxes_Parameters)
+
+Get_AvailableAxes_Responses = _reflection.GeneratedProtocolMessageType('Get_AvailableAxes_Responses', (_message.Message,), {
+  'DESCRIPTOR' : _GET_AVAILABLEAXES_RESPONSES,
+  '__module__' : 'AxisSystemControlService_pb2'
+  # @@protoc_insertion_point(class_scope:sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Responses)
+  })
+_sym_db.RegisterMessage(Get_AvailableAxes_Responses)
 
 Subscribe_AxisSystemState_Parameters = _reflection.GeneratedProtocolMessageType('Subscribe_AxisSystemState_Parameters', (_message.Message,), {
   'DESCRIPTOR' : _SUBSCRIBE_AXISSYSTEMSTATE_PARAMETERS,
@@ -498,8 +572,8 @@ _AXISSYSTEMCONTROLSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=828,
-  serialized_end=2241,
+  serialized_start=946,
+  serialized_end=2570,
   methods=[
   _descriptor.MethodDescriptor(
     name='EnableAxisSystem',
@@ -532,9 +606,19 @@ _AXISSYSTEMCONTROLSERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
+    name='Get_AvailableAxes',
+    full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService.Get_AvailableAxes',
+    index=3,
+    containing_service=None,
+    input_type=_GET_AVAILABLEAXES_PARAMETERS,
+    output_type=_GET_AVAILABLEAXES_RESPONSES,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
     name='Subscribe_AxisSystemState',
     full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService.Subscribe_AxisSystemState',
-    index=3,
+    index=4,
     containing_service=None,
     input_type=_SUBSCRIBE_AXISSYSTEMSTATE_PARAMETERS,
     output_type=_SUBSCRIBE_AXISSYSTEMSTATE_RESPONSES,
@@ -544,7 +628,7 @@ _AXISSYSTEMCONTROLSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='Subscribe_AxisFaultState',
     full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService.Subscribe_AxisFaultState',
-    index=4,
+    index=5,
     containing_service=None,
     input_type=_SUBSCRIBE_AXISFAULTSTATE_PARAMETERS,
     output_type=_SUBSCRIBE_AXISFAULTSTATE_RESPONSES,
@@ -554,7 +638,7 @@ _AXISSYSTEMCONTROLSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='Get_FCPAffectedByMetadata_AxisIdentifier',
     full_name='sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService.Get_FCPAffectedByMetadata_AxisIdentifier',
-    index=5,
+    index=6,
     containing_service=None,
     input_type=_GET_FCPAFFECTEDBYMETADATA_AXISIDENTIFIER_PARAMETERS,
     output_type=_GET_FCPAFFECTEDBYMETADATA_AXISIDENTIFIER_RESPONSES,

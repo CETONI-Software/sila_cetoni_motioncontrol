@@ -85,6 +85,7 @@ class MotionControlServer(QmixIOServer):
         # registering features
         #  Register de.cetoni.motioncontrol.axis.AxisSystemControlService
         self.AxisSystemControlService_servicer = AxisSystemControlService(
+            axis_system=axis_system,
             simulation_mode=self.simulation_mode
         )
         AxisSystemControlService_pb2_grpc.add_AxisSystemControlServiceServicer_to_server(
@@ -96,6 +97,7 @@ class MotionControlServer(QmixIOServer):
                          data_path=data_path)
         #  Register de.cetoni.motioncontrol.axis.PositionController
         self.PositionController_servicer = PositionController(
+            axis_system=axis_system,
             simulation_mode=self.simulation_mode
         )
         PositionController_pb2_grpc.add_PositionControllerServicer_to_server(
@@ -110,6 +112,7 @@ class MotionControlServer(QmixIOServer):
 
         #  Register de.cetoni.core.ShutdownController
         self.ShutdownController_servicer = ShutdownController(
+            device=axis_system,
             server_name=self.server_name,
             sila2_conf=self.sila2_config,
             simulation_mode=simulation_mode

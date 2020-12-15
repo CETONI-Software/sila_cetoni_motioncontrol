@@ -34,8 +34,12 @@ import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
 
+from typing import Dict
+
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
+# import SiLA errors
+from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAExecutionError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemControlService_pb2 as AxisSystemControlService_pb2
@@ -44,6 +48,7 @@ from .gRPC import AxisSystemControlService_pb2 as AxisSystemControlService_pb2
 # import default arguments
 from .AxisSystemControlService_default_arguments import default_dict
 
+from qmixsdk.qmixmotion import Axis, AxisSystem
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisSystemControlServiceReal:
@@ -52,250 +57,183 @@ class AxisSystemControlServiceReal:
         Allows to control motion systems like axis systems
     """
 
-    def __init__(self):
-        """Class initialiser"""
+    def __init__(self, axis_system: AxisSystem):
+        """
+        Class initialiser.
+
+        :param axis_system: The axis system that this feature shall operate on
+        """
+
+        self.axis_system = axis_system
+        self.axes: Dict[str, Axis] = {
+            self.axis_system.get_axis_device(i).get_device_name(): self.axis_system.get_axis_device(i)
+            for i in range(self.axis_system.get_axes_count())
+        }
+
+        self.METADATA_AXIS_IDENTIFIER = 'sila-de.cetoni-motioncontrol.axis-axissystemcontrolservice-v1-metadata-axisidentifier-bin'
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
-    def _get_command_state(self, command_uuid: str) -> silaFW_pb2.ExecutionInfo:
+    def _get_axis_name(self, invocation_metadata: Dict) -> str:
         """
-        Method to fill an ExecutionInfo message from the SiLA server for observable commands
-
-        :param command_uuid: The uuid of the command for which to return the current state
-
-        :return: An execution info object with the current command state
+        Retrieves the axis name that is given in the `invocation_metadata` of a RPC.
+        If the metadatum is not present an appropriate error is raised.
         """
+        invocation_metadata = {key: value for key, value in invocation_metadata}
+        logging.debug(f"Received invocation metadata: {invocation_metadata}")
+        try:
+            return invocation_metadata[self.METADATA_AXIS_IDENTIFIER].decode('utf-8')
+        except KeyError:
+            raise SiLAFrameworkError(SiLAFrameworkErrorType.INVALID_METADATA,
+                                     'This Command requires the AxisIdentifier metadata!')
 
-        #: Enumeration of silaFW_pb2.ExecutionInfo.CommandStatus
-        command_status = silaFW_pb2.ExecutionInfo.CommandStatus.waiting
-        #: Real silaFW_pb2.Real(0...1)
-        command_progress = None
-        #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
-        command_estimated_remaining = None
-        #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
-        command_lifetime_of_execution = None
-
-        # TODO: check the state of the command with the given uuid and return the correct information
-
-        # just return a default in this example
-        return silaFW_pb2.ExecutionInfo(
-            commandStatus=command_status,
-            progressInfo=(
-                command_progress if command_progress is not None else None
-            ),
-            estimatedRemainingTime=(
-                command_estimated_remaining if command_estimated_remaining is not None else None
-            ),
-            updatedLifetimeOfExecution=(
-                command_lifetime_of_execution if command_lifetime_of_execution is not None else None
-            )
-        )
 
     def EnableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.EnableAxisSystem_Responses:
         """
         Executes the unobservable command "Enable Axis System"
             Set all axes of the axis system into enabled state
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value = None
-    
-        # TODO:
-        #   Add implementation of Real for command EnableAxisSystem here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.EnableAxisSystem_Responses(
-                **default_dict['EnableAxisSystem_Responses']
-            )
-    
-        return return_value
-    
-    
+
+        self.axis_system.enable(True)
+
+        return AxisSystemControlService_pb2.EnableAxisSystem_Responses()
+
+
     def DisableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.DisableAxisSystem_Responses:
         """
         Executes the unobservable command "Disable Axis System"
             Set all axes of the axis system into disabled state
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value = None
-    
-        # TODO:
-        #   Add implementation of Real for command DisableAxisSystem here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.DisableAxisSystem_Responses(
-                **default_dict['DisableAxisSystem_Responses']
-            )
-    
-        return return_value
-    
-    
+
+        self.axis_system.enable(False)
+
+        return AxisSystemControlService_pb2.DisableAxisSystem_Responses()
+
+
     def ClearAxisFaultState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.ClearAxisFaultState_Responses:
         """
         Executes the unobservable command "Clear Axis Fault State"
             Clears the fault condition of a single axis. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state.
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value = None
-    
-        # TODO:
-        #   Add implementation of Real for command ClearAxisFaultState here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.ClearAxisFaultState_Responses(
-                **default_dict['ClearAxisFaultState_Responses']
-            )
-    
-        return return_value
-    
+
+        axis_name = self._get_axis_name(context.invocation_metadata())
+
+        try:
+            self.axes[axis_name].clear_fault()
+        except KeyError:
+            raise SiLAExecutionError(msg=f'There is no axis named {axis_name}!')
+
+        return AxisSystemControlService_pb2.ClearAxisFaultState_Responses()
+
 
     def Get_AvailableAxes(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Get_AvailableAxes_Responses:
         """
         Requests the unobservable property Available Axes
             The names of the individual axes of the axis system.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AvailableAxes (Available Axes): The names of the individual axes of the axis system.
         """
-    
-        # initialise the return value
-        return_value: AxisSystemControlService_pb2.Get_AvailableAxes_Responses = None
-    
-        # TODO:
-        #   Add implementation of Simulation for property AvailableAxes here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.Get_AvailableAxes_Responses(
-                **default_dict['Get_AvailableAxes_Responses']
-            )
-    
-        return return_value
-    
+
+        return AxisSystemControlService_pb2.Get_AvailableAxes_Responses(
+            AvailableAxes=[
+                silaFW_pb2.String(value=axis_name) for axis_name in self.axes.keys()
+            ]
+        )
+
     def Subscribe_AxisSystemState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses:
         """
         Requests the observable property Axis System State
             The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis system can move.
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AxisSystemState (Axis System State): The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the sate is 'Enabled', the axis system can move.
         """
-    
-        # initialise the return value
-        return_value: AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses = None
-    
-        # we could use a timeout here if we wanted
+
         while True:
-            # TODO:
-            #   Add implementation of Real for property AxisSystemState here and write the resulting
-            #   response in return_value
-    
-            # create the default value
-            if return_value is None:
-                return_value = AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses(
-                    **default_dict['Subscribe_AxisSystemState_Responses']
-                )
-    
-    
-            yield return_value
-    
-    
+            enabled = True
+            for axis in self.axes.values():
+                logging.debug(f"Axis {axis.get_device_name()} enabled? {axis.is_enabled()}")
+                enabled &= axis.is_enabled()
+
+            logging.debug(f"Axis system enabled? {enabled}")
+            yield AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses(
+                AxisSystemState=silaFW_pb2.String(value='Enabled' if enabled else 'Disabled')
+            )
+
+            time.sleep(0.5) # give client some time to catch up
+
     def Subscribe_AxisFaultState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses:
         """
         Requests the observable property Axis Fault State
             Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AxisFaultState (Axis Fault State): Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
         """
-    
-        # initialise the return value
-        return_value: AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses = None
-    
-        # we could use a timeout here if we wanted
+        axis_name = self._get_axis_name(context.invocation_metadata())
+
         while True:
-            # TODO:
-            #   Add implementation of Real for property AxisFaultState here and write the resulting
-            #   response in return_value
-    
-            # create the default value
-            if return_value is None:
-                return_value = AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses(
-                    **default_dict['Subscribe_AxisFaultState_Responses']
-                )
-    
-    
-            yield return_value
-    
+            yield AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses(
+                AxisFaultState=silaFW_pb2.Boolean(value=self.axes[axis_name].is_in_fault_state())
+            )
+
+            time.sleep(0.5) # give client some time to catch up
+
 
     def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
         """
         Requests the unobservable property FCPAffectedByMetadata Axis Identifier
             Specifies which Features/Commands/Properties of the SiLA server are affected by the Axis Identifier Metadata.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AffectedCalls (AffectedCalls): A string containing a list of Fully Qualified Identifiers of Features, Commands and Properties for which the SiLA Client Metadata is expected as part of the respective RPCs.
         """
-    
-        # initialise the return value
-        return_value: AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property FCPAffectedByMetadata_AxisIdentifier here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
-                **default_dict['Get_FCPAffectedByMetadata_AxisIdentifier_Responses']
-            )
-    
-        return return_value
+
+        return AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
+            AffectedCalls=[
+                silaFW_pb2.String(value="ClearAxisFaultState"),
+                silaFW_pb2.String(value="AxisFaultState"),
+            ]
+        )
+

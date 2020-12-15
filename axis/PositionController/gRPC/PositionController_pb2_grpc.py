@@ -35,16 +35,6 @@ class PositionControllerStub(object):
         self.MoveToHomePosition = channel.unary_unary(
                 '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition',
                 request_serializer=PositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
-                response_deserializer=SiLAFramework__pb2.CommandConfirmation.FromString,
-                )
-        self.MoveToHomePosition_Info = channel.unary_stream(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition_Info',
-                request_serializer=SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
-                response_deserializer=SiLAFramework__pb2.ExecutionInfo.FromString,
-                )
-        self.MoveToHomePosition_Result = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition_Result',
-                request_serializer=SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
                 response_deserializer=PositionController__pb2.MoveToHomePosition_Responses.FromString,
                 )
         self.StopMoving = channel.unary_unary(
@@ -87,20 +77,8 @@ class PositionControllerServicer(object):
     def MoveToHomePosition(self, request, context):
         """Move To Home Position
         Move the axis system to its home position. The axis system should manage the order of the movement and should know how
-        to move all axis into a home state.
+        to move all axes into a home state.
         """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def MoveToHomePosition_Info(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def MoveToHomePosition_Result(self, request, context):
-        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -142,16 +120,6 @@ def add_PositionControllerServicer_to_server(servicer, server):
             'MoveToHomePosition': grpc.unary_unary_rpc_method_handler(
                     servicer.MoveToHomePosition,
                     request_deserializer=PositionController__pb2.MoveToHomePosition_Parameters.FromString,
-                    response_serializer=SiLAFramework__pb2.CommandConfirmation.SerializeToString,
-            ),
-            'MoveToHomePosition_Info': grpc.unary_stream_rpc_method_handler(
-                    servicer.MoveToHomePosition_Info,
-                    request_deserializer=SiLAFramework__pb2.CommandExecutionUUID.FromString,
-                    response_serializer=SiLAFramework__pb2.ExecutionInfo.SerializeToString,
-            ),
-            'MoveToHomePosition_Result': grpc.unary_unary_rpc_method_handler(
-                    servicer.MoveToHomePosition_Result,
-                    request_deserializer=SiLAFramework__pb2.CommandExecutionUUID.FromString,
                     response_serializer=PositionController__pb2.MoveToHomePosition_Responses.SerializeToString,
             ),
             'StopMoving': grpc.unary_unary_rpc_method_handler(
@@ -240,40 +208,6 @@ class PositionController(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition',
             PositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
-            SiLAFramework__pb2.CommandConfirmation.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def MoveToHomePosition_Info(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition_Info',
-            SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
-            SiLAFramework__pb2.ExecutionInfo.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def MoveToHomePosition_Result(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition_Result',
-            SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
             PositionController__pb2.MoveToHomePosition_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
