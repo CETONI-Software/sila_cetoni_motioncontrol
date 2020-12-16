@@ -151,11 +151,11 @@ class AxisSystemControlServiceSimulation:
         return return_value
 
 
-    def ClearAxisFaultState(self, request, context: grpc.ServicerContext) \
-            -> AxisSystemControlService_pb2.ClearAxisFaultState_Responses:
+    def ClearFaultState(self, request, context: grpc.ServicerContext) \
+            -> AxisSystemControlService_pb2.ClearFaultState_Responses:
         """
         Executes the unobservable command "Clear Axis Fault State"
-            Clears the fault condition of a single axis. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state.
+            Clears the fault condition of all axes. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state.
 
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
@@ -169,13 +169,13 @@ class AxisSystemControlServiceSimulation:
         return_value = None
 
         # TODO:
-        #   Add implementation of Simulation for command ClearAxisFaultState here and write the resulting response
+        #   Add implementation of Simulation for command ClearFaultState here and write the resulting response
         #   in return_value
 
         # fallback to default
         if return_value is None:
-            return_value = AxisSystemControlService_pb2.ClearAxisFaultState_Responses(
-                **default_dict['ClearAxisFaultState_Responses']
+            return_value = AxisSystemControlService_pb2.ClearFaultState_Responses(
+                **default_dict['ClearFaultState_Responses']
             )
 
         return return_value
@@ -186,29 +186,29 @@ class AxisSystemControlServiceSimulation:
         """
         Requests the unobservable property Available Axes
             The names of the individual axes of the axis system.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AvailableAxes (Available Axes): The names of the individual axes of the axis system.
         """
-    
+
         # initialise the return value
         return_value: AxisSystemControlService_pb2.Get_AvailableAxes_Responses = None
-    
+
         # TODO:
         #   Add implementation of Real for property AvailableAxes here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisSystemControlService_pb2.Get_AvailableAxes_Responses(
                 **default_dict['Get_AvailableAxes_Responses']
             )
-    
+
         return return_value
-    
+
     def Subscribe_AxisSystemState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses:
         """
@@ -241,62 +241,34 @@ class AxisSystemControlServiceSimulation:
             yield return_value
 
 
-    def Subscribe_AxisFaultState(self, request, context: grpc.ServicerContext) \
-            -> AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses:
+    def Subscribe_AxesInFaultState(self, request, context: grpc.ServicerContext) \
+            -> AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses:
         """
-        Requests the observable property Axis Fault State
-            Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
+        Requests the observable property Axes In Fault State
+            Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling ClearFaultState.
 
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
 
         :returns: A response object with the following fields:
-            AxisFaultState (Axis Fault State): Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearAxisFaultState.
+            AxesInFaultState (Axis Fault State): Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can be cleared by calling ClearFaultState.
         """
 
         # initialise the return value
-        return_value: AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses = None
+        return_value: AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses = None
 
         # we could use a timeout here if we wanted
         while True:
             # TODO:
-            #   Add implementation of Simulation for property AxisFaultState here and write the resulting
+            #   Add implementation of Simulation for property AxesInFaultState here and write the resulting
             #   response in return_value
 
             # create the default value
             if return_value is None:
-                return_value = AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses(
-                    **default_dict['Subscribe_AxisFaultState_Responses']
+                return_value = AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses(
+                    **default_dict['Subscribe_AxesInFaultState_Responses']
                 )
 
 
             yield return_value
 
-
-    def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context: grpc.ServicerContext) \
-            -> AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
-        """
-        Requests the unobservable property FCPAffectedByMetadata Axis Identifier
-            Specifies which Features/Commands/Properties of the SiLA server are affected by the Axis Identifier Metadata.
-
-        :param request: An empty gRPC request object (properties have no parameters)
-        :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-
-        :returns: A response object with the following fields:
-            AffectedCalls (AffectedCalls): A string containing a list of Fully Qualified Identifiers of Features, Commands and Properties for which the SiLA Client Metadata is expected as part of the respective RPCs.
-        """
-
-        # initialise the return value
-        return_value: AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses = None
-
-        # TODO:
-        #   Add implementation of Simulation for property FCPAffectedByMetadata_AxisIdentifier here and write the resulting response
-        #   in return_value
-
-        # fallback to default
-        if return_value is None:
-            return_value = AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
-                **default_dict['Get_FCPAffectedByMetadata_AxisIdentifier_Responses']
-            )
-
-        return return_value

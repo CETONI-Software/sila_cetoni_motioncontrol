@@ -26,10 +26,10 @@ class AxisSystemControlServiceStub(object):
                 request_serializer=AxisSystemControlService__pb2.DisableAxisSystem_Parameters.SerializeToString,
                 response_deserializer=AxisSystemControlService__pb2.DisableAxisSystem_Responses.FromString,
                 )
-        self.ClearAxisFaultState = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/ClearAxisFaultState',
-                request_serializer=AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.SerializeToString,
-                response_deserializer=AxisSystemControlService__pb2.ClearAxisFaultState_Responses.FromString,
+        self.ClearFaultState = channel.unary_unary(
+                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/ClearFaultState',
+                request_serializer=AxisSystemControlService__pb2.ClearFaultState_Parameters.SerializeToString,
+                response_deserializer=AxisSystemControlService__pb2.ClearFaultState_Responses.FromString,
                 )
         self.Get_AvailableAxes = channel.unary_unary(
                 '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Get_AvailableAxes',
@@ -41,15 +41,10 @@ class AxisSystemControlServiceStub(object):
                 request_serializer=AxisSystemControlService__pb2.Subscribe_AxisSystemState_Parameters.SerializeToString,
                 response_deserializer=AxisSystemControlService__pb2.Subscribe_AxisSystemState_Responses.FromString,
                 )
-        self.Subscribe_AxisFaultState = channel.unary_stream(
-                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Subscribe_AxisFaultState',
-                request_serializer=AxisSystemControlService__pb2.Subscribe_AxisFaultState_Parameters.SerializeToString,
-                response_deserializer=AxisSystemControlService__pb2.Subscribe_AxisFaultState_Responses.FromString,
-                )
-        self.Get_FCPAffectedByMetadata_AxisIdentifier = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Get_FCPAffectedByMetadata_AxisIdentifier',
-                request_serializer=AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters.SerializeToString,
-                response_deserializer=AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses.FromString,
+        self.Subscribe_AxesInFaultState = channel.unary_stream(
+                '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Subscribe_AxesInFaultState',
+                request_serializer=AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Parameters.SerializeToString,
+                response_deserializer=AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Responses.FromString,
                 )
 
 
@@ -74,10 +69,10 @@ class AxisSystemControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ClearAxisFaultState(self, request, context):
-        """Clear Axis Fault State
-        Clears the fault condition of a single axis. This is some kind of error acknowledge that clears the last fault and sets
-        the device in an error-free state.
+    def ClearFaultState(self, request, context):
+        """Clear Fault State
+        Clears the fault condition of all axes. This is some kind of error acknowledge that clears the last fault and sets the
+        device in an error-free state.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -100,18 +95,10 @@ class AxisSystemControlServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Subscribe_AxisFaultState(self, request, context):
-        """Axis Fault State
-        Returns if a single axis of the system is in fault state. If the value is true (i.e. the axis is in fault state), it can
-        be cleared by calling ClearAxisFaultState.
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context):
-        """Axis Identifier
-        The identifier of a single axis of an axis system
+    def Subscribe_AxesInFaultState(self, request, context):
+        """Axes In Fault State
+        Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling
+        ClearFaultState.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -130,10 +117,10 @@ def add_AxisSystemControlServiceServicer_to_server(servicer, server):
                     request_deserializer=AxisSystemControlService__pb2.DisableAxisSystem_Parameters.FromString,
                     response_serializer=AxisSystemControlService__pb2.DisableAxisSystem_Responses.SerializeToString,
             ),
-            'ClearAxisFaultState': grpc.unary_unary_rpc_method_handler(
-                    servicer.ClearAxisFaultState,
-                    request_deserializer=AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.FromString,
-                    response_serializer=AxisSystemControlService__pb2.ClearAxisFaultState_Responses.SerializeToString,
+            'ClearFaultState': grpc.unary_unary_rpc_method_handler(
+                    servicer.ClearFaultState,
+                    request_deserializer=AxisSystemControlService__pb2.ClearFaultState_Parameters.FromString,
+                    response_serializer=AxisSystemControlService__pb2.ClearFaultState_Responses.SerializeToString,
             ),
             'Get_AvailableAxes': grpc.unary_unary_rpc_method_handler(
                     servicer.Get_AvailableAxes,
@@ -145,15 +132,10 @@ def add_AxisSystemControlServiceServicer_to_server(servicer, server):
                     request_deserializer=AxisSystemControlService__pb2.Subscribe_AxisSystemState_Parameters.FromString,
                     response_serializer=AxisSystemControlService__pb2.Subscribe_AxisSystemState_Responses.SerializeToString,
             ),
-            'Subscribe_AxisFaultState': grpc.unary_stream_rpc_method_handler(
-                    servicer.Subscribe_AxisFaultState,
-                    request_deserializer=AxisSystemControlService__pb2.Subscribe_AxisFaultState_Parameters.FromString,
-                    response_serializer=AxisSystemControlService__pb2.Subscribe_AxisFaultState_Responses.SerializeToString,
-            ),
-            'Get_FCPAffectedByMetadata_AxisIdentifier': grpc.unary_unary_rpc_method_handler(
-                    servicer.Get_FCPAffectedByMetadata_AxisIdentifier,
-                    request_deserializer=AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters.FromString,
-                    response_serializer=AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses.SerializeToString,
+            'Subscribe_AxesInFaultState': grpc.unary_stream_rpc_method_handler(
+                    servicer.Subscribe_AxesInFaultState,
+                    request_deserializer=AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Parameters.FromString,
+                    response_serializer=AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Responses.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -202,7 +184,7 @@ class AxisSystemControlService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ClearAxisFaultState(request,
+    def ClearFaultState(request,
             target,
             options=(),
             channel_credentials=None,
@@ -212,9 +194,9 @@ class AxisSystemControlService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/ClearAxisFaultState',
-            AxisSystemControlService__pb2.ClearAxisFaultState_Parameters.SerializeToString,
-            AxisSystemControlService__pb2.ClearAxisFaultState_Responses.FromString,
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/ClearFaultState',
+            AxisSystemControlService__pb2.ClearFaultState_Parameters.SerializeToString,
+            AxisSystemControlService__pb2.ClearFaultState_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -253,7 +235,7 @@ class AxisSystemControlService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Subscribe_AxisFaultState(request,
+    def Subscribe_AxesInFaultState(request,
             target,
             options=(),
             channel_credentials=None,
@@ -263,25 +245,8 @@ class AxisSystemControlService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Subscribe_AxisFaultState',
-            AxisSystemControlService__pb2.Subscribe_AxisFaultState_Parameters.SerializeToString,
-            AxisSystemControlService__pb2.Subscribe_AxisFaultState_Responses.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Get_FCPAffectedByMetadata_AxisIdentifier(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Get_FCPAffectedByMetadata_AxisIdentifier',
-            AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters.SerializeToString,
-            AxisSystemControlService__pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses.FromString,
+        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.AxisSystemControlService/Subscribe_AxesInFaultState',
+            AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Parameters.SerializeToString,
+            AxisSystemControlService__pb2.Subscribe_AxesInFaultState_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

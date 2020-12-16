@@ -265,11 +265,11 @@ class MotionControlClient(SiLA2Client):
 
         return response
 
-    def ClearAxisFaultState(self,
-                      parameter: AxisSystemControlService_pb2.ClearAxisFaultState_Parameters = None) \
-            -> AxisSystemControlService_pb2.ClearAxisFaultState_Responses:
+    def ClearFaultState(self,
+                      parameter: AxisSystemControlService_pb2.ClearFaultState_Parameters = None) \
+            -> AxisSystemControlService_pb2.ClearFaultState_Responses:
         """
-        Wrapper to call the unobservable command ClearAxisFaultState on the server.
+        Wrapper to call the unobservable command ClearFaultState on the server.
 
         :param parameter: The parameter gRPC construct required for this command.
 
@@ -278,18 +278,18 @@ class MotionControlClient(SiLA2Client):
         # noinspection PyUnusedLocal - type definition, just for convenience
         grpc_err: grpc.Call
 
-        logging.debug("Calling ClearAxisFaultState:")
+        logging.debug("Calling ClearFaultState:")
         try:
             # resolve to default if no value given
             #   TODO: Implement a more reasonable default value
             if parameter is None:
-                parameter = AxisSystemControlService_pb2.ClearAxisFaultState_Parameters(
-                    **AxisSystemControlService_default_dict['ClearAxisFaultState_Parameters']
+                parameter = AxisSystemControlService_pb2.ClearFaultState_Parameters(
+                    **AxisSystemControlService_default_dict['ClearFaultState_Parameters']
                 )
 
-            response = self.impl.de.cetoni.motioncontrol.axis.AxisSystemControlService_stub.ClearAxisFaultState(parameter)
+            response = self.impl.de.cetoni.motioncontrol.axis.AxisSystemControlService_stub.ClearFaultState(parameter)
 
-            logging.debug('ClearAxisFaultState response: {response}'.format(response=response))
+            logging.debug('ClearFaultState response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
             return None
@@ -572,19 +572,19 @@ class MotionControlClient(SiLA2Client):
             return None
 
         return response
-    def Subscribe_AxisFaultState(self) \
-            -> AxisSystemControlService_pb2.Subscribe_AxisFaultState_Responses:
-        """Wrapper to get property AxisFaultState from the server."""
+    def Subscribe_AxesInFaultState(self) \
+            -> AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses:
+        """Wrapper to get property AxesInFaultState from the server."""
         # noinspection PyUnusedLocal - type definition, just for convenience
         grpc_err: grpc.Call
 
-        logging.debug("Reading observable property AxisFaultState:")
+        logging.debug("Reading observable property AxesInFaultState:")
         try:
-            response = self.AxisSystemControlService_stub.Subscribe_AxisFaultState(
-                AxisSystemControlService_pb2.Subscribe_AxisFaultState_Parameters()
+            response = self.AxisSystemControlService_stub.Subscribe_AxesInFaultState(
+                AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Parameters()
             )
             logging.debug(
-                'Subscribe_AxisFaultState response: {response}'.format(
+                'Subscribe_AxesInFaultState response: {response}'.format(
                     response=response
                 )
             )
@@ -606,28 +606,6 @@ class MotionControlClient(SiLA2Client):
             )
             logging.debug(
                 'Subscribe_Position response: {response}'.format(
-                    response=response
-                )
-            )
-        except grpc.RpcError as grpc_err:
-            self.grpc_error_handling(grpc_err)
-            return None
-
-        return response
-
-    def Get_FCPAffectedByMetadata_AxisIdentifier(self) \
-            -> AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
-        """Wrapper to get property FCPAffectedByMetadata_AxisIdentifier from the server."""
-        # noinspection PyUnusedLocal - type definition, just for convenience
-        grpc_err: grpc.Call
-
-        logging.debug("Reading unobservable property FCPAffectedByMetadata_AxisIdentifier:")
-        try:
-            response = self.AxisSystemControlService_stub.Get_FCPAffectedByMetadata_AxisIdentifier(
-                AxisSystemControlService_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters()
-            )
-            logging.debug(
-                'Get_FCPAffectedByMetadata_AxisIdentifier response: {response}'.format(
                     response=response
                 )
             )
