@@ -109,8 +109,6 @@ class MotionControlServer(QmixIOServer):
                          servicer=self.PositionController_servicer,
                          data_path=data_path)
 
-        self.simulation_mode = simulation_mode
-
         #  Register de.cetoni.core.ShutdownController
         self.ShutdownController_servicer = ShutdownController(
             device=axis_system,
