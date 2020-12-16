@@ -3,12 +3,12 @@ ________________________________________________________________________
 
 :PROJECT: SiLA2_python
 
-*Position Controller*
+*Axis System Position Controller*
 
-:details: PositionController:
+:details: AxisSystemPositionController:
     Allows to control the position of an axis system
 
-:file:    PositionController_real.py
+:file:    AxisSystemPositionController_real.py
 :authors: Florian Meinicke
 
 :date: (creation)          2020-12-15T07:50:56.826849
@@ -43,11 +43,11 @@ import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType
 
 # import gRPC modules for this feature
-from .gRPC import PositionController_pb2 as PositionController_pb2
-# from .gRPC import PositionController_pb2_grpc as PositionController_pb2_grpc
+from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2
+# from .gRPC import AxisSystemPositionController_pb2_grpc as AxisSystemPositionController_pb2_grpc
 
 # import default arguments
-from .PositionController_default_arguments import default_dict
+from .AxisSystemPositionController_default_arguments import default_dict
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from qmixsdk import qmixbus
@@ -71,9 +71,9 @@ class Position:
         return "Position({x}, {y})".format(x=self.x, y=self.y)
 
 # noinspection PyPep8Naming,PyUnusedLocal
-class PositionControllerReal:
+class AxisSystemPositionControllerReal:
     """
-    Implementation of the *Position Controller* in *Real* mode
+    Implementation of the *Axis System Position Controller* in *Real* mode
         Allows to control motion systems like axis systems
     """
 
@@ -204,7 +204,7 @@ class PositionControllerReal:
         return self._wait_movement_finished()
 
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToPosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
 
@@ -223,11 +223,11 @@ class PositionControllerReal:
         self.movement_uuid = ''
         time.sleep(0.6)
 
-        return PositionController_pb2.MoveToPosition_Responses()
+        return AxisSystemPositionController_pb2.MoveToPosition_Responses()
 
 
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToHomePosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToHomePosition_Responses:
         """
         Executes the unobservable command "Move To Home Position"
             Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axis into a home state.
@@ -250,11 +250,11 @@ class PositionControllerReal:
             logging.info("Position: %s", self.axis_system.get_actual_position_xy())
             is_moving = not self.axis_system.is_homing_position_attained()
 
-        return PositionController_pb2.MoveToHomePosition_Responses()
+        return AxisSystemPositionController_pb2.MoveToHomePosition_Responses()
 
 
     def StopMoving(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.StopMoving_Responses:
+            -> AxisSystemPositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops all movement of the axis system
@@ -269,11 +269,11 @@ class PositionControllerReal:
 
         self.axis_system.stop_move()
 
-        return PositionController_pb2.StopMoving_Responses()
+        return AxisSystemPositionController_pb2.StopMoving_Responses()
 
 
     def Subscribe_Position(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.Subscribe_Position_Responses:
+            -> AxisSystemPositionController_pb2.Subscribe_Position_Responses:
         """
         Requests the observable property Position
             The current XY position of the axis system
@@ -288,9 +288,9 @@ class PositionControllerReal:
         while True:
             position = self.axis_system.get_actual_position_xy()
 
-            yield PositionController_pb2.Subscribe_Position_Responses(
-                Position=PositionController_pb2.DataType_Position(
-                    Position=PositionController_pb2.DataType_Position.Position_Struct(
+            yield AxisSystemPositionController_pb2.Subscribe_Position_Responses(
+                Position=AxisSystemPositionController_pb2.DataType_Position(
+                    Position=AxisSystemPositionController_pb2.DataType_Position.Position_Struct(
                         X=silaFW_pb2.Real(value=position.x),
                         Y=silaFW_pb2.Real(value=position.y)
                     )

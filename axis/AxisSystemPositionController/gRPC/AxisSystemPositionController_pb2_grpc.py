@@ -2,12 +2,12 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import PositionController_pb2 as PositionController__pb2
+from . import AxisSystemPositionController_pb2 as AxisSystemPositionController__pb2
 import sila2lib.framework.SiLAFramework_pb2 as SiLAFramework__pb2
 
 
-class PositionControllerStub(object):
-    """Feature: Position Controller
+class AxisSystemPositionControllerStub(object):
+    """Feature: Axis System Position Controller
     Allows to control the position of an axis system
     """
 
@@ -18,39 +18,39 @@ class PositionControllerStub(object):
             channel: A grpc.Channel.
         """
         self.MoveToPosition = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition',
-                request_serializer=PositionController__pb2.MoveToPosition_Parameters.SerializeToString,
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition',
+                request_serializer=AxisSystemPositionController__pb2.MoveToPosition_Parameters.SerializeToString,
                 response_deserializer=SiLAFramework__pb2.CommandConfirmation.FromString,
                 )
         self.MoveToPosition_Info = channel.unary_stream(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition_Info',
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition_Info',
                 request_serializer=SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
                 response_deserializer=SiLAFramework__pb2.ExecutionInfo.FromString,
                 )
         self.MoveToPosition_Result = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition_Result',
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition_Result',
                 request_serializer=SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
-                response_deserializer=PositionController__pb2.MoveToPosition_Responses.FromString,
+                response_deserializer=AxisSystemPositionController__pb2.MoveToPosition_Responses.FromString,
                 )
         self.MoveToHomePosition = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition',
-                request_serializer=PositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
-                response_deserializer=PositionController__pb2.MoveToHomePosition_Responses.FromString,
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToHomePosition',
+                request_serializer=AxisSystemPositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
+                response_deserializer=AxisSystemPositionController__pb2.MoveToHomePosition_Responses.FromString,
                 )
         self.StopMoving = channel.unary_unary(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/StopMoving',
-                request_serializer=PositionController__pb2.StopMoving_Parameters.SerializeToString,
-                response_deserializer=PositionController__pb2.StopMoving_Responses.FromString,
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/StopMoving',
+                request_serializer=AxisSystemPositionController__pb2.StopMoving_Parameters.SerializeToString,
+                response_deserializer=AxisSystemPositionController__pb2.StopMoving_Responses.FromString,
                 )
         self.Subscribe_Position = channel.unary_stream(
-                '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/Subscribe_Position',
-                request_serializer=PositionController__pb2.Subscribe_Position_Parameters.SerializeToString,
-                response_deserializer=PositionController__pb2.Subscribe_Position_Responses.FromString,
+                '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/Subscribe_Position',
+                request_serializer=AxisSystemPositionController__pb2.Subscribe_Position_Parameters.SerializeToString,
+                response_deserializer=AxisSystemPositionController__pb2.Subscribe_Position_Responses.FromString,
                 )
 
 
-class PositionControllerServicer(object):
-    """Feature: Position Controller
+class AxisSystemPositionControllerServicer(object):
+    """Feature: Axis System Position Controller
     Allows to control the position of an axis system
     """
 
@@ -100,11 +100,11 @@ class PositionControllerServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_PositionControllerServicer_to_server(servicer, server):
+def add_AxisSystemPositionControllerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'MoveToPosition': grpc.unary_unary_rpc_method_handler(
                     servicer.MoveToPosition,
-                    request_deserializer=PositionController__pb2.MoveToPosition_Parameters.FromString,
+                    request_deserializer=AxisSystemPositionController__pb2.MoveToPosition_Parameters.FromString,
                     response_serializer=SiLAFramework__pb2.CommandConfirmation.SerializeToString,
             ),
             'MoveToPosition_Info': grpc.unary_stream_rpc_method_handler(
@@ -115,32 +115,32 @@ def add_PositionControllerServicer_to_server(servicer, server):
             'MoveToPosition_Result': grpc.unary_unary_rpc_method_handler(
                     servicer.MoveToPosition_Result,
                     request_deserializer=SiLAFramework__pb2.CommandExecutionUUID.FromString,
-                    response_serializer=PositionController__pb2.MoveToPosition_Responses.SerializeToString,
+                    response_serializer=AxisSystemPositionController__pb2.MoveToPosition_Responses.SerializeToString,
             ),
             'MoveToHomePosition': grpc.unary_unary_rpc_method_handler(
                     servicer.MoveToHomePosition,
-                    request_deserializer=PositionController__pb2.MoveToHomePosition_Parameters.FromString,
-                    response_serializer=PositionController__pb2.MoveToHomePosition_Responses.SerializeToString,
+                    request_deserializer=AxisSystemPositionController__pb2.MoveToHomePosition_Parameters.FromString,
+                    response_serializer=AxisSystemPositionController__pb2.MoveToHomePosition_Responses.SerializeToString,
             ),
             'StopMoving': grpc.unary_unary_rpc_method_handler(
                     servicer.StopMoving,
-                    request_deserializer=PositionController__pb2.StopMoving_Parameters.FromString,
-                    response_serializer=PositionController__pb2.StopMoving_Responses.SerializeToString,
+                    request_deserializer=AxisSystemPositionController__pb2.StopMoving_Parameters.FromString,
+                    response_serializer=AxisSystemPositionController__pb2.StopMoving_Responses.SerializeToString,
             ),
             'Subscribe_Position': grpc.unary_stream_rpc_method_handler(
                     servicer.Subscribe_Position,
-                    request_deserializer=PositionController__pb2.Subscribe_Position_Parameters.FromString,
-                    response_serializer=PositionController__pb2.Subscribe_Position_Responses.SerializeToString,
+                    request_deserializer=AxisSystemPositionController__pb2.Subscribe_Position_Parameters.FromString,
+                    response_serializer=AxisSystemPositionController__pb2.Subscribe_Position_Responses.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController', rpc_method_handlers)
+            'sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class PositionController(object):
-    """Feature: Position Controller
+class AxisSystemPositionController(object):
+    """Feature: Axis System Position Controller
     Allows to control the position of an axis system
     """
 
@@ -155,8 +155,8 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition',
-            PositionController__pb2.MoveToPosition_Parameters.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition',
+            AxisSystemPositionController__pb2.MoveToPosition_Parameters.SerializeToString,
             SiLAFramework__pb2.CommandConfirmation.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -172,7 +172,7 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition_Info',
+        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition_Info',
             SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
             SiLAFramework__pb2.ExecutionInfo.FromString,
             options, channel_credentials,
@@ -189,9 +189,9 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToPosition_Result',
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToPosition_Result',
             SiLAFramework__pb2.CommandExecutionUUID.SerializeToString,
-            PositionController__pb2.MoveToPosition_Responses.FromString,
+            AxisSystemPositionController__pb2.MoveToPosition_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -206,9 +206,9 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/MoveToHomePosition',
-            PositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
-            PositionController__pb2.MoveToHomePosition_Responses.FromString,
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/MoveToHomePosition',
+            AxisSystemPositionController__pb2.MoveToHomePosition_Parameters.SerializeToString,
+            AxisSystemPositionController__pb2.MoveToHomePosition_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -223,9 +223,9 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/StopMoving',
-            PositionController__pb2.StopMoving_Parameters.SerializeToString,
-            PositionController__pb2.StopMoving_Responses.FromString,
+        return grpc.experimental.unary_unary(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/StopMoving',
+            AxisSystemPositionController__pb2.StopMoving_Parameters.SerializeToString,
+            AxisSystemPositionController__pb2.StopMoving_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -240,8 +240,8 @@ class PositionController(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.positioncontroller.v1.PositionController/Subscribe_Position',
-            PositionController__pb2.Subscribe_Position_Parameters.SerializeToString,
-            PositionController__pb2.Subscribe_Position_Responses.FromString,
+        return grpc.experimental.unary_stream(request, target, '/sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.AxisSystemPositionController/Subscribe_Position',
+            AxisSystemPositionController__pb2.Subscribe_Position_Parameters.SerializeToString,
+            AxisSystemPositionController__pb2.Subscribe_Position_Responses.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

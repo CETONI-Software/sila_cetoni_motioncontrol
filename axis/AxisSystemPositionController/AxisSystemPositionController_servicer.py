@@ -3,12 +3,12 @@ ________________________________________________________________________
 
 :PROJECT: SiLA2_python
 
-*Position Controller*
+*Axis System Position Controller*
 
-:details: PositionController:
+:details: AxisSystemPositionController:
     Allows to control the position of an axis system
 
-:file:    PositionController_servicer.py
+:file:    AxisSystemPositionController_servicer.py
 :authors: Florian Meinicke
 
 :date: (creation)          2020-12-15T07:50:56.817849
@@ -40,19 +40,19 @@ import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 from impl.common.qmix_errors import QmixSDKSiLAError, SiLAError, DeviceError
 
 # import gRPC modules for this feature
-from .gRPC import PositionController_pb2 as PositionController_pb2
-from .gRPC import PositionController_pb2_grpc as PositionController_pb2_grpc
+from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2
+from .gRPC import AxisSystemPositionController_pb2_grpc as AxisSystemPositionController_pb2_grpc
 
 # import simulation and real implementation
-from .PositionController_simulation import PositionControllerSimulation
-from .PositionController_real import PositionControllerReal
+from .AxisSystemPositionController_simulation import AxisSystemPositionControllerSimulation
+from .AxisSystemPositionController_real import AxisSystemPositionControllerReal
 
 
-class PositionController(PositionController_pb2_grpc.PositionControllerServicer):
+class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSystemPositionControllerServicer):
     """
     Allows to control motion systems like axis systems
     """
-    implementation: Union[PositionControllerSimulation, PositionControllerReal]
+    implementation: Union[AxisSystemPositionControllerSimulation, AxisSystemPositionControllerReal]
     simulation_mode: bool
 
     def __init__(self, axis_system, simulation_mode: bool = True):
@@ -71,8 +71,8 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             self.switch_to_real_mode()
 
     def _inject_implementation(self,
-                               implementation: Union[PositionControllerSimulation,
-                                                     PositionControllerReal]
+                               implementation: Union[AxisSystemPositionControllerSimulation,
+                                                     AxisSystemPositionControllerReal]
                                ) -> bool:
         """
         Dependency injection of the implementation used.
@@ -87,12 +87,12 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
     def switch_to_simulation_mode(self):
         """Method that will automatically be called by the server when the simulation mode is requested."""
         self.simulation_mode = True
-        self._inject_implementation(PositionControllerSimulation())
+        self._inject_implementation(AxisSystemPositionControllerSimulation())
 
     def switch_to_real_mode(self):
         """Method that will automatically be called by the server when the real mode is requested."""
         self.simulation_mode = False
-        self._inject_implementation(PositionControllerReal(self.axis_system))
+        self._inject_implementation(AxisSystemPositionControllerReal(self.axis_system))
 
     def MoveToPosition(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.CommandConfirmation:
@@ -151,7 +151,7 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             err.raise_rpc_error(context=context)
 
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToPosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
 
@@ -175,7 +175,7 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
 
 
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToHomePosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToHomePosition_Responses:
         """
         Executes the unobservable command "Move To Home Position"
             Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axis into a home state.
@@ -201,7 +201,7 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             err.raise_rpc_error(context=context)
 
     def StopMoving(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.StopMoving_Responses:
+            -> AxisSystemPositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops all movement of the axis system
@@ -226,7 +226,7 @@ class PositionController(PositionController_pb2_grpc.PositionControllerServicer)
             err.raise_rpc_error(context=context)
 
     def Subscribe_Position(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.Subscribe_Position_Responses:
+            -> AxisSystemPositionController_pb2.Subscribe_Position_Responses:
         """
         Requests the observable property Position
             The current XY position of the axis system

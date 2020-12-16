@@ -3,12 +3,12 @@ ________________________________________________________________________
 
 :PROJECT: SiLA2_python
 
-*Position Controller*
+*Axis System Position Controller*
 
-:details: PositionController:
+:details: AxisSystemPositionController:
     Allows to control the position of an axis system
 
-:file:    PositionController_simulation.py
+:file:    AxisSystemPositionController_simulation.py
 :authors: Florian Meinicke
 
 :date: (creation)          2020-12-15T07:50:56.821849
@@ -38,17 +38,17 @@ import grpc         # used for type hinting only
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 
 # import gRPC modules for this feature
-from .gRPC import PositionController_pb2 as PositionController_pb2
-# from .gRPC import PositionController_pb2_grpc as PositionController_pb2_grpc
+from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2
+# from .gRPC import AxisSystemPositionController_pb2_grpc as AxisSystemPositionController_pb2_grpc
 
 # import default arguments
-from .PositionController_default_arguments import default_dict
+from .AxisSystemPositionController_default_arguments import default_dict
 
 
 # noinspection PyPep8Naming,PyUnusedLocal
-class PositionControllerSimulation:
+class AxisSystemPositionControllerSimulation:
     """
-    Implementation of the *Position Controller* in *Simulation* mode
+    Implementation of the *Axis System Position Controller* in *Simulation* mode
         Allows to control motion systems like axis systems
     """
 
@@ -96,25 +96,25 @@ class PositionControllerSimulation:
         """
         Executes the observable command "Move To Position"
             Move the axis system to the given position with a certain velocity
-    
+
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to
             request.Velocity (Velocity): A real value between 0 (exclusive) and 1 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 1 means, all axes travel with their maximum velocity. A value of 0.5 means, all axes travel with the half of the maximum velocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A command confirmation object with the following information:
             commandId: A command id with which this observable command can be referenced in future calls
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
-    
+
         # initialise default values
         #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
         lifetime_of_execution: silaFW_pb2.Duration = None
-    
+
         # TODO:
         #   Execute the actual command
         #   Optional: Generate a lifetime_of_execution
-    
+
         # respond with UUID and lifetime of execution
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=str(uuid.uuid4()))
         if lifetime_of_execution is not None:
@@ -126,16 +126,16 @@ class PositionControllerSimulation:
             return silaFW_pb2.CommandConfirmation(
                 commandExecutionUUID=command_uuid
             )
-    
+
     def MoveToPosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
         """
         Returns execution information regarding the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             commandId: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: An ExecutionInfo response stream for the command with the following fields:
             commandStatus: Status of the command (enumeration)
             progressInfo: Information on the progress of the command (0 to 1)
@@ -144,10 +144,10 @@ class PositionControllerSimulation:
         """
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # Get the current state
         execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
         # construct the initial return dictionary in case while is not executed
         return_values = {'commandStatus': execution_info.commandStatus}
         if execution_info.HasField('progressInfo'):
@@ -156,7 +156,7 @@ class PositionControllerSimulation:
             return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
         if execution_info.HasField('updatedLifetimeOfExecution'):
             return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
         # we loop only as long as the command is running
         while execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.waiting \
                 or execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.running:
@@ -170,10 +170,10 @@ class PositionControllerSimulation:
             #       * Determine the progress (progressInfo)
             #       * Determine the estimated remaining time
             #       * Update the Lifetime of execution
-    
+
             # Update all values
             execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
             # construct the return dictionary
             return_values = {'commandStatus': execution_info.commandStatus}
             if execution_info.HasField('progressInfo'):
@@ -182,70 +182,70 @@ class PositionControllerSimulation:
                 return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
             if execution_info.HasField('updatedLifetimeOfExecution'):
                 return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
             # we add a small delay to give the client a chance to keep up.
             time.sleep(0.5)
         else:
             # one last time yield the status
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToPosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
-        return_value: PositionController_pb2.MoveToPosition_Responses = None
-    
+        return_value: AxisSystemPositionController_pb2.MoveToPosition_Responses = None
+
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # TODO:
         #   Add implementation of Simulation for command MoveToPosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
-            return_value = PositionController_pb2.MoveToPosition_Responses(
+            return_value = AxisSystemPositionController_pb2.MoveToPosition_Responses(
                 **default_dict['MoveToPosition_Responses']
             )
-    
+
         return return_value
-    
-    
+
+
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.CommandConfirmation:
         """
         Executes the observable command "Move To Home Position"
             Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axis into a home state.
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A command confirmation object with the following information:
             commandId: A command id with which this observable command can be referenced in future calls
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
-    
+
         # initialise default values
         #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
         lifetime_of_execution: silaFW_pb2.Duration = None
-    
+
         # TODO:
         #   Execute the actual command
         #   Optional: Generate a lifetime_of_execution
-    
+
         # respond with UUID and lifetime of execution
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=str(uuid.uuid4()))
         if lifetime_of_execution is not None:
@@ -257,16 +257,16 @@ class PositionControllerSimulation:
             return silaFW_pb2.CommandConfirmation(
                 commandExecutionUUID=command_uuid
             )
-    
+
     def MoveToHomePosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
         """
         Returns execution information regarding the command call :meth:`~.MoveToHomePosition`.
-    
+
         :param request: A request object with the following properties
             commandId: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: An ExecutionInfo response stream for the command with the following fields:
             commandStatus: Status of the command (enumeration)
             progressInfo: Information on the progress of the command (0 to 1)
@@ -275,10 +275,10 @@ class PositionControllerSimulation:
         """
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # Get the current state
         execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
         # construct the initial return dictionary in case while is not executed
         return_values = {'commandStatus': execution_info.commandStatus}
         if execution_info.HasField('progressInfo'):
@@ -287,7 +287,7 @@ class PositionControllerSimulation:
             return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
         if execution_info.HasField('updatedLifetimeOfExecution'):
             return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
         # we loop only as long as the command is running
         while execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.waiting \
                 or execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.running:
@@ -301,10 +301,10 @@ class PositionControllerSimulation:
             #       * Determine the progress (progressInfo)
             #       * Determine the estimated remaining time
             #       * Update the Lifetime of execution
-    
+
             # Update all values
             execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
             # construct the return dictionary
             return_values = {'commandStatus': execution_info.commandStatus}
             if execution_info.HasField('progressInfo'):
@@ -313,107 +313,107 @@ class PositionControllerSimulation:
                 return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
             if execution_info.HasField('updatedLifetimeOfExecution'):
                 return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
             # we add a small delay to give the client a chance to keep up.
             time.sleep(0.5)
         else:
             # one last time yield the status
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
     def MoveToHomePosition_Result(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.MoveToHomePosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToHomePosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToHomePosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
-        return_value: PositionController_pb2.MoveToHomePosition_Responses = None
-    
+        return_value: AxisSystemPositionController_pb2.MoveToHomePosition_Responses = None
+
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # TODO:
         #   Add implementation of Simulation for command MoveToHomePosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
-            return_value = PositionController_pb2.MoveToHomePosition_Responses(
+            return_value = AxisSystemPositionController_pb2.MoveToHomePosition_Responses(
                 **default_dict['MoveToHomePosition_Responses']
             )
-    
+
         return return_value
-    
-    
+
+
     def StopMoving(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.StopMoving_Responses:
+            -> AxisSystemPositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops all movement of the axis system
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
         return_value = None
-    
+
         # TODO:
         #   Add implementation of Simulation for command StopMoving here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
-            return_value = PositionController_pb2.StopMoving_Responses(
+            return_value = AxisSystemPositionController_pb2.StopMoving_Responses(
                 **default_dict['StopMoving_Responses']
             )
-    
+
         return return_value
-    
+
 
     def Subscribe_Position(self, request, context: grpc.ServicerContext) \
-            -> PositionController_pb2.Subscribe_Position_Responses:
+            -> AxisSystemPositionController_pb2.Subscribe_Position_Responses:
         """
         Requests the observable property Position
             The current XY position of the axis system
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             Position (Position): The current XY position of the axis system
         """
-    
+
         # initialise the return value
-        return_value: PositionController_pb2.Subscribe_Position_Responses = None
-    
+        return_value: AxisSystemPositionController_pb2.Subscribe_Position_Responses = None
+
         # we could use a timeout here if we wanted
         while True:
             # TODO:
             #   Add implementation of Simulation for property Position here and write the resulting
             #   response in return_value
-    
+
             # create the default value
             if return_value is None:
-                return_value = PositionController_pb2.Subscribe_Position_Responses(
+                return_value = AxisSystemPositionController_pb2.Subscribe_Position_Responses(
                     **default_dict['Subscribe_Position_Responses']
                 )
-    
-    
-            yield return_value
-    
 
-    
+
+            yield return_value
+
+
+

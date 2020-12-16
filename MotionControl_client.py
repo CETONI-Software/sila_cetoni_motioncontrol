@@ -51,10 +51,10 @@ from impl.de.cetoni.motioncontrol.axis.AxisSystemControlService.gRPC import Axis
 from impl.de.cetoni.motioncontrol.axis.AxisSystemControlService.gRPC import AxisSystemControlService_pb2_grpc
 # import default arguments for this feature
 from impl.de.cetoni.motioncontrol.axis.AxisSystemControlService.AxisSystemControlService_default_arguments import default_dict as AxisSystemControlService_default_dict
-from impl.de.cetoni.motioncontrol.axis.PositionController.gRPC import PositionController_pb2
-from impl.de.cetoni.motioncontrol.axis.PositionController.gRPC import PositionController_pb2_grpc
+from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import AxisSystemPositionController_pb2
+from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import AxisSystemPositionController_pb2_grpc
 # import default arguments for this feature
-from impl.de.cetoni.motioncontrol.axis.PositionController.PositionController_default_arguments import default_dict as PositionController_default_dict
+from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.AxisSystemPositionController_default_arguments import default_dict as AxisSystemPositionController_default_dict
 
 
 # noinspection PyPep8Naming, PyUnusedLocal
@@ -103,8 +103,8 @@ class MotionControlClient(SiLA2Client):
         # Create stub objects used to communicate with the server
         self.AxisSystemControlService_stub = \
             AxisSystemControlService_pb2_grpc.AxisSystemControlServiceStub(self.channel)
-        self.PositionController_stub = \
-            PositionController_pb2_grpc.PositionControllerStub(self.channel)
+        self.AxisSystemPositionController_stub = \
+            AxisSystemPositionController_pb2_grpc.AxisSystemPositionControllerStub(self.channel)
 
         # initialise class variables for server information storage
         self.server_version = ''
@@ -297,7 +297,7 @@ class MotionControlClient(SiLA2Client):
         return response
 
     def MoveToPosition(self,
-                      parameter: PositionController_pb2.MoveToPosition_Parameters = None) \
+                      parameter: AxisSystemPositionController_pb2.MoveToPosition_Parameters = None) \
             -> silaFW_pb2.CommandConfirmation:
         """
         Wrapper to call the observable command MoveToPosition on the server.
@@ -316,11 +316,11 @@ class MotionControlClient(SiLA2Client):
             # resolve to default if no value given
             #   TODO: Implement a more reasonable default value
             if parameter is None:
-                parameter = PositionController_pb2.MoveToPosition_Parameters(
-                    **PositionController_default_dict['MoveToPosition_Parameters']
+                parameter = AxisSystemPositionController_pb2.MoveToPosition_Parameters(
+                    **AxisSystemPositionController_default_dict['MoveToPosition_Parameters']
                 )
 
-            response = self.impl.de.cetoni.motioncontrol.axis.PositionController_stub.MoveToPosition(parameter)
+            response = self.impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController_stub.MoveToPosition(parameter)
 
             logging.debug('MoveToPosition response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
@@ -357,7 +357,7 @@ class MotionControlClient(SiLA2Client):
             )
         )
         try:
-            response = self.PositionController_stub.MoveToPosition_Info(uuid)
+            response = self.AxisSystemPositionController_stub.MoveToPosition_Info(uuid)
             logging.debug('MoveToPosition status information: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
@@ -367,7 +367,7 @@ class MotionControlClient(SiLA2Client):
 
     def MoveToPosition_Result(self,
                              uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
-            -> PositionController_pb2.MoveToPosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToPosition_Responses:
         """
         Wrapper to get an intermediate response for the observable command MoveToPosition on the server.
 
@@ -389,7 +389,7 @@ class MotionControlClient(SiLA2Client):
         )
 
         try:
-            response = self.PositionController_stub.MoveToPosition_Result(uuid)
+            response = self.AxisSystemPositionController_stub.MoveToPosition_Result(uuid)
             logging.debug('MoveToPosition result response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
@@ -398,7 +398,7 @@ class MotionControlClient(SiLA2Client):
         return response
 
     def MoveToHomePosition(self,
-                      parameter: PositionController_pb2.MoveToHomePosition_Parameters = None) \
+                      parameter: AxisSystemPositionController_pb2.MoveToHomePosition_Parameters = None) \
             -> silaFW_pb2.CommandConfirmation:
         """
         Wrapper to call the observable command MoveToHomePosition on the server.
@@ -417,11 +417,11 @@ class MotionControlClient(SiLA2Client):
             # resolve to default if no value given
             #   TODO: Implement a more reasonable default value
             if parameter is None:
-                parameter = PositionController_pb2.MoveToHomePosition_Parameters(
-                    **PositionController_default_dict['MoveToHomePosition_Parameters']
+                parameter = AxisSystemPositionController_pb2.MoveToHomePosition_Parameters(
+                    **AxisSystemPositionController_default_dict['MoveToHomePosition_Parameters']
                 )
 
-            response = self.impl.de.cetoni.motioncontrol.axis.PositionController_stub.MoveToHomePosition(parameter)
+            response = self.impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController_stub.MoveToHomePosition(parameter)
 
             logging.debug('MoveToHomePosition response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
@@ -458,7 +458,7 @@ class MotionControlClient(SiLA2Client):
             )
         )
         try:
-            response = self.PositionController_stub.MoveToHomePosition_Info(uuid)
+            response = self.AxisSystemPositionController_stub.MoveToHomePosition_Info(uuid)
             logging.debug('MoveToHomePosition status information: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
@@ -468,7 +468,7 @@ class MotionControlClient(SiLA2Client):
 
     def MoveToHomePosition_Result(self,
                              uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
-            -> PositionController_pb2.MoveToHomePosition_Responses:
+            -> AxisSystemPositionController_pb2.MoveToHomePosition_Responses:
         """
         Wrapper to get an intermediate response for the observable command MoveToHomePosition on the server.
 
@@ -490,7 +490,7 @@ class MotionControlClient(SiLA2Client):
         )
 
         try:
-            response = self.PositionController_stub.MoveToHomePosition_Result(uuid)
+            response = self.AxisSystemPositionController_stub.MoveToHomePosition_Result(uuid)
             logging.debug('MoveToHomePosition result response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
@@ -499,8 +499,8 @@ class MotionControlClient(SiLA2Client):
         return response
 
     def StopMoving(self,
-                      parameter: PositionController_pb2.StopMoving_Parameters = None) \
-            -> PositionController_pb2.StopMoving_Responses:
+                      parameter: AxisSystemPositionController_pb2.StopMoving_Parameters = None) \
+            -> AxisSystemPositionController_pb2.StopMoving_Responses:
         """
         Wrapper to call the unobservable command StopMoving on the server.
 
@@ -516,11 +516,11 @@ class MotionControlClient(SiLA2Client):
             # resolve to default if no value given
             #   TODO: Implement a more reasonable default value
             if parameter is None:
-                parameter = PositionController_pb2.StopMoving_Parameters(
-                    **PositionController_default_dict['StopMoving_Parameters']
+                parameter = AxisSystemPositionController_pb2.StopMoving_Parameters(
+                    **AxisSystemPositionController_default_dict['StopMoving_Parameters']
                 )
 
-            response = self.impl.de.cetoni.motioncontrol.axis.PositionController_stub.StopMoving(parameter)
+            response = self.impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController_stub.StopMoving(parameter)
 
             logging.debug('StopMoving response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
@@ -594,15 +594,15 @@ class MotionControlClient(SiLA2Client):
 
         return response
     def Subscribe_Position(self) \
-            -> PositionController_pb2.Subscribe_Position_Responses:
+            -> AxisSystemPositionController_pb2.Subscribe_Position_Responses:
         """Wrapper to get property Position from the server."""
         # noinspection PyUnusedLocal - type definition, just for convenience
         grpc_err: grpc.Call
 
         logging.debug("Reading observable property Position:")
         try:
-            response = self.PositionController_stub.Subscribe_Position(
-                PositionController_pb2.Subscribe_Position_Parameters()
+            response = self.AxisSystemPositionController_stub.Subscribe_Position(
+                AxisSystemPositionController_pb2.Subscribe_Position_Parameters()
             )
             logging.debug(
                 'Subscribe_Position response: {response}'.format(
