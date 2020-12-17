@@ -35,7 +35,7 @@ import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
 
-from typing import Dict
+from typing import Any, Dict
 
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
@@ -69,12 +69,12 @@ class AxisSystemPositionControllerReal:
         Allows to control motion systems like axis systems
     """
 
-    def __init__(self, axis_system: AxisSystem, jib_length: int):
+    def __init__(self, axis_system: AxisSystem, device_properties: Dict[str, Any]):
         """
         Class initialiser.
 
         :param axis_system: The axis system that this feature shall operate on
-        :param jib_length: The capillary distance from the central axis of the pivot arm
+        :param device_properties: Additional device properties that cannot be retrieved using QmixSDK functions
         """
 
         self.axis_system = axis_system
@@ -85,7 +85,9 @@ class AxisSystemPositionControllerReal:
             for i in range(self.axis_system.get_axes_count())
         }
 
-        self.positioning_shape = self._create_positioning_shape(jib_length)
+        if 'jib_length' in device_properties:
+            self.positioning_shape = \
+                self._create_positioning_shape(device_properties['jib_length'])
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
