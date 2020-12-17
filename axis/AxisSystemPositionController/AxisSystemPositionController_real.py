@@ -88,6 +88,15 @@ class AxisSystemPositionControllerReal:
         if 'jib_length' in device_properties:
             self.positioning_shape = \
                 self._create_positioning_shape(device_properties['jib_length'])
+        else:
+            x_axis = self.axis_system.get_axis_device(0)
+            y_axis = self.axis_system.get_axis_device(1)
+            self.positioning_shape = geom.box(
+                x_axis.get_position_min(),
+                y_axis.get_position_min(),
+                x_axis.get_position_max(),
+                y_axis.get_position_max()
+            )
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
