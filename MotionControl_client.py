@@ -55,6 +55,14 @@ from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import 
 from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import AxisSystemPositionController_pb2_grpc
 # import default arguments for this feature
 from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.AxisSystemPositionController_default_arguments import default_dict as AxisSystemPositionController_default_dict
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.gRPC import AxisPositionController_pb2
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.gRPC import AxisPositionController_pb2_grpc
+# import default arguments for this feature
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.AxisPositionController_default_arguments import default_dict as AxisPositionController_default_dict
+from impl.de.cetoni.core.ShutdownController.gRPC import ShutdownController_pb2
+from impl.de.cetoni.core.ShutdownController.gRPC import ShutdownController_pb2_grpc
+# import default arguments for this feature
+from impl.de.cetoni.core.ShutdownController.ShutdownController_default_arguments import default_dict as ShutdownController_default_dict
 
 
 # noinspection PyPep8Naming, PyUnusedLocal
@@ -105,6 +113,10 @@ class MotionControlClient(SiLA2Client):
             AxisSystemControlService_pb2_grpc.AxisSystemControlServiceStub(self.channel)
         self.AxisSystemPositionController_stub = \
             AxisSystemPositionController_pb2_grpc.AxisSystemPositionControllerStub(self.channel)
+        self.AxisPositionController_stub = \
+            AxisPositionController_pb2_grpc.AxisPositionControllerStub(self.channel)
+        self.ShutdownController_stub = \
+            ShutdownController_pb2_grpc.ShutdownControllerStub(self.channel)
 
         # initialise class variables for server information storage
         self.server_version = ''
@@ -529,6 +541,270 @@ class MotionControlClient(SiLA2Client):
 
         return response
 
+    def MoveToPosition(self,
+                      parameter: AxisPositionController_pb2.MoveToPosition_Parameters = None) \
+            -> silaFW_pb2.CommandConfirmation:
+        """
+        Wrapper to call the observable command MoveToPosition on the server.
+
+        :param parameter: The parameter gRPC construct required for this command.
+
+        :returns: A command confirmation object with the following information:
+            commandExecutionUUID: A command id with which this observable command can be referenced in future calls
+            lifetimeOfExecution (optional): The (maximum) lifetime of this command call.
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Calling MoveToPosition:")
+        try:
+            # resolve to default if no value given
+            #   TODO: Implement a more reasonable default value
+            if parameter is None:
+                parameter = AxisPositionController_pb2.MoveToPosition_Parameters(
+                    **AxisPositionController_default_dict['MoveToPosition_Parameters']
+                )
+
+            response = self.AxisPositionController_stub.MoveToPosition(parameter)
+
+            logging.debug('MoveToPosition response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def MoveToPosition_Info(self,
+                           uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
+            -> silaFW_pb2.ExecutionInfo:
+        """
+        Wrapper to get an intermediate response for the observable command MoveToPosition on the server.
+
+        :param uuid: The UUID that has been returned with the first command call. Can be given as string or as the
+                     corresponding SiLA2 gRPC object.
+
+        :returns: A gRPC object with the status information that has been defined for this command. The following fields
+                  are defined:
+                    * *commandStatus*: Status of the command (enumeration)
+                    * *progressInfo*: Information on the progress of the command (0 to 1)
+                    * *estimatedRemainingTime*: Estimate of the remaining time required to run the command
+                    * *updatedLifetimeOfExecution*: An update on the execution lifetime
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        if type(uuid) is str:
+            uuid = silaFW_pb2.CommandExecutionUUID(value=uuid)
+
+        logging.debug(
+            "Requesting status information for command MoveToPosition (UUID={uuid}):".format(
+                uuid=uuid.value
+            )
+        )
+        try:
+            response = self.AxisPositionController_stub.MoveToPosition_Info(uuid)
+            logging.debug('MoveToPosition status information: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def MoveToPosition_Result(self,
+                             uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
+            -> AxisPositionController_pb2.MoveToPosition_Responses:
+        """
+        Wrapper to get an intermediate response for the observable command MoveToPosition on the server.
+
+        :param uuid: The UUID that has been returned with the first command call. Can be given as string or as the
+                     corresponding SiLA2 gRPC object.
+
+        :returns: A gRPC object with the result response that has been defined for this command.
+
+        .. note:: Whether the result is available or not can and should be evaluated by calling the
+                  :meth:`MoveToPosition_Info` method of this call.
+        """
+        if type(uuid) is str:
+            uuid = silaFW_pb2.CommandExecutionUUID(value=uuid)
+
+        logging.debug(
+            "Requesting status information for command MoveToPosition (UUID={uuid}):".format(
+                uuid=uuid.value
+            )
+        )
+
+        try:
+            response = self.AxisPositionController_stub.MoveToPosition_Result(uuid)
+            logging.debug('MoveToPosition result response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def MoveToHomePosition(self,
+                      parameter: AxisPositionController_pb2.MoveToHomePosition_Parameters = None) \
+            -> AxisPositionController_pb2.MoveToHomePosition_Responses:
+        """
+        Wrapper to call the unobservable command MoveToHomePosition on the server.
+
+        :param parameter: The parameter gRPC construct required for this command.
+
+        :returns: A gRPC object with the response that has been defined for this command.
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Calling MoveToHomePosition:")
+        try:
+            # resolve to default if no value given
+            #   TODO: Implement a more reasonable default value
+            if parameter is None:
+                parameter = AxisPositionController_pb2.MoveToHomePosition_Parameters(
+                    **AxisPositionController_default_dict['MoveToHomePosition_Parameters']
+                )
+
+            response = self.AxisPositionController_stub.MoveToHomePosition(parameter)
+
+            logging.debug('MoveToHomePosition response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def StopMoving(self,
+                      parameter: AxisPositionController_pb2.StopMoving_Parameters = None) \
+            -> AxisPositionController_pb2.StopMoving_Responses:
+        """
+        Wrapper to call the unobservable command StopMoving on the server.
+
+        :param parameter: The parameter gRPC construct required for this command.
+
+        :returns: A gRPC object with the response that has been defined for this command.
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Calling StopMoving:")
+        try:
+            # resolve to default if no value given
+            #   TODO: Implement a more reasonable default value
+            if parameter is None:
+                parameter = AxisPositionController_pb2.StopMoving_Parameters(
+                    **AxisPositionController_default_dict['StopMoving_Parameters']
+                )
+
+            response = self.AxisPositionController_stub.StopMoving(parameter)
+
+            logging.debug('StopMoving response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def Shutdown(self,
+                      parameter: ShutdownController_pb2.Shutdown_Parameters = None) \
+            -> silaFW_pb2.CommandConfirmation:
+        """
+        Wrapper to call the observable command Shutdown on the server.
+
+        :param parameter: The parameter gRPC construct required for this command.
+
+        :returns: A command confirmation object with the following information:
+            commandExecutionUUID: A command id with which this observable command can be referenced in future calls
+            lifetimeOfExecution (optional): The (maximum) lifetime of this command call.
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Calling Shutdown:")
+        try:
+            # resolve to default if no value given
+            #   TODO: Implement a more reasonable default value
+            if parameter is None:
+                parameter = ShutdownController_pb2.Shutdown_Parameters(
+                    **ShutdownController_default_dict['Shutdown_Parameters']
+                )
+
+            response = self.ShutdownController_stub.Shutdown(parameter)
+
+            logging.debug('Shutdown response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def Shutdown_Info(self,
+                           uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
+            -> silaFW_pb2.ExecutionInfo:
+        """
+        Wrapper to get an intermediate response for the observable command Shutdown on the server.
+
+        :param uuid: The UUID that has been returned with the first command call. Can be given as string or as the
+                     corresponding SiLA2 gRPC object.
+
+        :returns: A gRPC object with the status information that has been defined for this command. The following fields
+                  are defined:
+                    * *commandStatus*: Status of the command (enumeration)
+                    * *progressInfo*: Information on the progress of the command (0 to 1)
+                    * *estimatedRemainingTime*: Estimate of the remaining time required to run the command
+                    * *updatedLifetimeOfExecution*: An update on the execution lifetime
+        """
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        if type(uuid) is str:
+            uuid = silaFW_pb2.CommandExecutionUUID(value=uuid)
+
+        logging.debug(
+            "Requesting status information for command Shutdown (UUID={uuid}):".format(
+                uuid=uuid.value
+            )
+        )
+        try:
+            response = self.ShutdownController_stub.Shutdown_Info(uuid)
+            logging.debug('Shutdown status information: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+    def Shutdown_Result(self,
+                             uuid: Union[str, silaFW_pb2.CommandExecutionUUID]) \
+            -> ShutdownController_pb2.Shutdown_Responses:
+        """
+        Wrapper to get an intermediate response for the observable command Shutdown on the server.
+
+        :param uuid: The UUID that has been returned with the first command call. Can be given as string or as the
+                     corresponding SiLA2 gRPC object.
+
+        :returns: A gRPC object with the result response that has been defined for this command.
+
+        .. note:: Whether the result is available or not can and should be evaluated by calling the
+                  :meth:`Shutdown_Info` method of this call.
+        """
+        if type(uuid) is str:
+            uuid = silaFW_pb2.CommandExecutionUUID(value=uuid)
+
+        logging.debug(
+            "Requesting status information for command Shutdown (UUID={uuid}):".format(
+                uuid=uuid.value
+            )
+        )
+
+        try:
+            response = self.ShutdownController_stub.Shutdown_Result(uuid)
+            logging.debug('Shutdown result response: {response}'.format(response=response))
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
 
     def Get_AvailableAxes(self) \
             -> AxisSystemControlService_pb2.Get_AvailableAxes_Responses:
@@ -593,7 +869,7 @@ class MotionControlClient(SiLA2Client):
             return None
 
         return response
-    def Subscribe_Position(self) \
+    def Subscribe_AxisSystemPosition(self) \
             -> AxisSystemPositionController_pb2.Subscribe_Position_Responses:
         """Wrapper to get property Position from the server."""
         # noinspection PyUnusedLocal - type definition, just for convenience
@@ -614,6 +890,156 @@ class MotionControlClient(SiLA2Client):
             return None
 
         return response
+    def Subscribe_AxisPosition(self) \
+            -> AxisPositionController_pb2.Subscribe_Position_Responses:
+        """Wrapper to get property Position from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading observable property Position:")
+        try:
+            response = self.AxisPositionController_stub.Subscribe_Position(
+                AxisPositionController_pb2.Subscribe_Position_Parameters()
+            )
+            logging.debug(
+                'Subscribe_Position response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+    def Get_PositionUnit(self) \
+            -> AxisPositionController_pb2.Get_PositionUnit_Responses:
+        """Wrapper to get property PositionUnit from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property PositionUnit:")
+        try:
+            response = self.AxisPositionController_stub.Get_PositionUnit(
+                AxisPositionController_pb2.Get_PositionUnit_Parameters()
+            )
+            logging.debug(
+                'Get_PositionUnit response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+    def Get_MinimumPosition(self) \
+            -> AxisPositionController_pb2.Get_MinimumPosition_Responses:
+        """Wrapper to get property MinimumPosition from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property MinimumPosition:")
+        try:
+            response = self.AxisPositionController_stub.Get_MinimumPosition(
+                AxisPositionController_pb2.Get_MinimumPosition_Parameters()
+            )
+            logging.debug(
+                'Get_MinimumPosition response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+    def Get_MaximumPosition(self) \
+            -> AxisPositionController_pb2.Get_MaximumPosition_Responses:
+        """Wrapper to get property MaximumPosition from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property MaximumPosition:")
+        try:
+            response = self.AxisPositionController_stub.Get_MaximumPosition(
+                AxisPositionController_pb2.Get_MaximumPosition_Parameters()
+            )
+            logging.debug(
+                'Get_MaximumPosition response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+    def Get_MinimumVelocity(self) \
+            -> AxisPositionController_pb2.Get_MinimumVelocity_Responses:
+        """Wrapper to get property MinimumVelocity from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property MinimumVelocity:")
+        try:
+            response = self.AxisPositionController_stub.Get_MinimumVelocity(
+                AxisPositionController_pb2.Get_MinimumVelocity_Parameters()
+            )
+            logging.debug(
+                'Get_MinimumVelocity response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+    def Get_MaximumVelocity(self) \
+            -> AxisPositionController_pb2.Get_MaximumVelocity_Responses:
+        """Wrapper to get property MaximumVelocity from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property MaximumVelocity:")
+        try:
+            response = self.AxisPositionController_stub.Get_MaximumVelocity(
+                AxisPositionController_pb2.Get_MaximumVelocity_Parameters()
+            )
+            logging.debug(
+                'Get_MaximumVelocity response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
+
+    def Get_FCPAffectedByMetadata_AxisIdentifier(self) \
+            -> AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
+        """Wrapper to get property FCPAffectedByMetadata_AxisIdentifier from the server."""
+        # noinspection PyUnusedLocal - type definition, just for convenience
+        grpc_err: grpc.Call
+
+        logging.debug("Reading unobservable property FCPAffectedByMetadata_AxisIdentifier:")
+        try:
+            response = self.AxisPositionController_stub.Get_FCPAffectedByMetadata_AxisIdentifier(
+                AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Parameters()
+            )
+            logging.debug(
+                'Get_FCPAffectedByMetadata_AxisIdentifier response: {response}'.format(
+                    response=response
+                )
+            )
+        except grpc.RpcError as grpc_err:
+            self.grpc_error_handling(grpc_err)
+            return None
+
+        return response
+
 
     @staticmethod
     def grpc_error_handling(error_object: grpc.Call) -> None:

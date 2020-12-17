@@ -12,6 +12,7 @@
     "SiLA_feature_list": [
       "de/cetoni/motioncontrol/axis/AxisSystemControlService",
       "de/cetoni/motioncontrol/axis/AxisSystemPositionController",
+      "de/cetoni/motioncontrol/axis/AxisPositionController",
       "de/cetoni/core/ShutdownController"
     ],
     "communication_port": "50052",

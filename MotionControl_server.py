@@ -44,6 +44,10 @@ from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import 
 from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.gRPC import AxisSystemPositionController_pb2_grpc
 # import default arguments for this feature
 from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.AxisSystemPositionController_default_arguments import default_dict as AxisSystemPositionController_default_dict
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.gRPC import AxisPositionController_pb2
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.gRPC import AxisPositionController_pb2_grpc
+# import default arguments for this feature
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.AxisPositionController_default_arguments import default_dict as AxisPositionController_default_dict
 from impl.de.cetoni.core.ShutdownController.gRPC import ShutdownController_pb2
 from impl.de.cetoni.core.ShutdownController.gRPC import ShutdownController_pb2_grpc
 # import default arguments for this feature
@@ -52,6 +56,7 @@ from impl.de.cetoni.core.ShutdownController.ShutdownController_default_arguments
 # Import the servicer modules for each feature
 from impl.de.cetoni.motioncontrol.axis.AxisSystemControlService.AxisSystemControlService_servicer import AxisSystemControlService
 from impl.de.cetoni.motioncontrol.axis.AxisSystemPositionController.AxisSystemPositionController_servicer import AxisSystemPositionController
+from impl.de.cetoni.motioncontrol.axis.AxisPositionController.AxisPositionController_servicer import AxisPositionController
 from impl.de.cetoni.core.ShutdownController.ShutdownController_servicer import ShutdownController
 
 # import qmixsdk
@@ -110,6 +115,18 @@ class MotionControlServer(QmixIOServer):
         )
         self.add_feature(feature_id='AxisSystemPositionController',
                          servicer=self.AxisSystemPositionController_servicer,
+                         data_path=data_path)
+        #  Register de.cetoni.motioncontrol.axis.AxisPositionController
+        self.AxisPositionController_servicer = AxisPositionController(
+            axis_system=axis_system,
+            simulation_mode=self.simulation_mode
+        )
+        AxisPositionController_pb2_grpc.add_AxisPositionControllerServicer_to_server(
+            self.AxisPositionController_servicer,
+            self.grpc_server
+        )
+        self.add_feature(feature_id='AxisPositionController',
+                         servicer=self.AxisPositionController_servicer,
                          data_path=data_path)
 
         #  Register de.cetoni.core.ShutdownController
