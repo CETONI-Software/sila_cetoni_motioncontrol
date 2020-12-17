@@ -34,13 +34,14 @@ from os import X_OK
 import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
-from collections import namedtuple
+
+from typing import Dict
 
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 
 # import SiLA errors
-from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType
+from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAValidationError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2
@@ -49,26 +50,17 @@ from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionControll
 # import default arguments
 from .AxisSystemPositionController_default_arguments import default_dict
 
+import math
+import numpy as np
+import shapely.geometry as geom
+import shapely.ops as ops
+# only for debugging the positioning shape
+# from matplotlib import use
+# use('Agg')
+# import matplotlib.pyplot as plt
+
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from qmixsdk import qmixbus
-
-class Position:
-    """
-    Helper class that defines a simple (X, Y) position vector
-    """
-
-    def __init__(self, x: float, y: float):
-        """
-        Class initializer
-
-        :param x: The X coordinate of the position
-        :param y: The Y coordinate of the position
-        """
-        self.x = x
-        self.y = y
-
-    def __str__(self) -> str:
-        return "Position({x}, {y})".format(x=self.x, y=self.y)
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisSystemPositionControllerReal:
@@ -77,17 +69,81 @@ class AxisSystemPositionControllerReal:
         Allows to control motion systems like axis systems
     """
 
-    def __init__(self, axis_system: AxisSystem):
+    def __init__(self, axis_system: AxisSystem, jib_length: int):
         """
         Class initialiser.
 
         :param axis_system: The axis system that this feature shall operate on
+        :param jib_length: The capillary distance from the central axis of the pivot arm
         """
 
         self.axis_system = axis_system
         self.movement_uuid = ''
 
+        self.axes: Dict[str, Axis] = {
+            self.axis_system.get_axis_device(i).get_device_name(): self.axis_system.get_axis_device(i)
+            for i in range(self.axis_system.get_axes_count())
+        }
+
+        self.positioning_shape = self._create_positioning_shape(jib_length)
+
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
+
+    def _create_positioning_shape(self, jib_length):
+        """
+        Create the positioning shape that represents the valid space of (X, Y)
+        coordinates for movement commands of the axis system
+
+        :param jib_length: The capillary distance from the central axis of the pivot arm
+        """
+
+        # the number of line segments to approximate an arc-like shape
+        num_segments = 1000
+
+        min_radius = self.axes['rotAXYS_1_Radius'].get_position_min()
+        max_radius = self.axes['rotAXYS_1_Radius'].get_position_max()
+        min_angle = self.axes['rotAXYS_1_Rotation'].get_position_min()
+        max_angle = self.axes['rotAXYS_1_Rotation'].get_position_max()
+        inner_angle = math.atan(jib_length / min_radius)
+        outer_angle = math.atan(jib_length / max_radius)
+        inner_angle_min = min_angle - inner_angle
+        inner_angle_max = max_angle - inner_angle
+        outer_angle_min = min_angle - outer_angle
+        outer_angle_max = max_angle - outer_angle
+
+        # the inner arc
+        inner_radius = math.sqrt(min_radius ** 2 + jib_length ** 2) # 46.1546
+        inner_start_angle = math.degrees(-inner_angle_min) # 151.767
+        inner_end_angle = math.degrees(-inner_angle_max) # 46.8603
+        inner_theta = np.radians(np.linspace(inner_start_angle, inner_end_angle, num_segments))
+        inner_x = inner_radius * np.cos(inner_theta)
+        # we need to invert this because the coordinate system has a Y-axis that is flipped
+        inner_y = -inner_radius * np.sin(inner_theta)
+
+        inner_arc = geom.LineString(np.column_stack([inner_x, inner_y]))
+
+        # the outer arc
+        outer_radius = math.sqrt(max_radius ** 2 + jib_length ** 2) # 145.617
+        outer_start_angle = math.degrees(-outer_angle_min) # 135.913
+        outer_end_angle = math.degrees(-outer_angle_max) # 31.0069
+        outer_theta = np.radians(np.linspace(outer_start_angle, outer_end_angle, num_segments))
+        outer_x = outer_radius * np.cos(outer_theta)
+        # we need to invert this because the coordinate system has a Y-axis that is flipped
+        outer_y = -outer_radius * np.sin(outer_theta)
+
+        outer_arc = geom.LineString(np.column_stack([outer_x, outer_y]))
+
+        # connect the first and last points of both arcs to get a closed shape
+        left_bound = geom.LineString([inner_arc.coords[0], outer_arc.coords[0]])
+        logging.debug(f"left_bound: {left_bound}")
+        right_bound = geom.LineString([inner_arc.coords[-1], outer_arc.coords[-1]])
+        logging.debug(f"right_bound: {right_bound}")
+
+        arc = ops.linemerge([left_bound, inner_arc, outer_arc, right_bound])
+        # plt.plot(*arc.xy)
+        # plt.savefig('fig.png')
+
+        return geom.Polygon(arc)
 
     def _ensure_stopped(self):
         """
@@ -120,6 +176,28 @@ class AxisSystemPositionControllerReal:
             raise SiLAFrameworkError(
                 SiLAFrameworkErrorType.COMMAND_EXECUTION_NOT_FINISHED
             )
+
+    def _validate_position(self, point: geom.Point):
+        """
+        Validates that the given point `point` lies within the positioning shape
+        of the axis system. If this is not the case an appropriate SiLAValidationError
+        will be raised.
+
+        :param point: The point to validate
+        """
+
+        # plt.plot(*point.xy, 'bo')
+        # plt.savefig('fig.png')
+
+        if not point.within(self.positioning_shape):
+            nearest_point, dummy = ops.nearest_points(self.positioning_shape, point)
+            logging.debug(f"nearest: {nearest_point}, other: {dummy}")
+            raise SiLAValidationError(
+            'Position',
+            f'The given Position {point.x, point.y} is not within the valid '\
+            'positioning range for the axis system! The nearest valid position is '
+            f'({nearest_point.x:.2f}, {nearest_point.y:.2f}).'
+        )
 
     def _wait_movement_finished(self):
         """
@@ -161,13 +239,14 @@ class AxisSystemPositionControllerReal:
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
 
-        requested_position = Position(
+        requested_position = geom.Point(
             request.Position.Position.X.value,
             request.Position.Position.Y.value
         )
         requested_velocity = request.Velocity.value
 
         self._ensure_stopped()
+        self._validate_position(requested_position)
 
         self.movement_uuid = str(uuid.uuid4())
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=self.movement_uuid)
@@ -223,7 +302,12 @@ class AxisSystemPositionControllerReal:
         self.movement_uuid = ''
         time.sleep(0.6)
 
+        for i in range(self.axis_system.get_axes_count()):
+            axis = self.axis_system.get_axis_device(i)
+            logging.debug(f"{axis.get_device_name()}: {axis.get_actual_position()}")
+
         return AxisSystemPositionController_pb2.MoveToPosition_Responses()
+
 
 
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
@@ -249,6 +333,10 @@ class AxisSystemPositionControllerReal:
             time.sleep(0.5)
             logging.info("Position: %s", self.axis_system.get_actual_position_xy())
             is_moving = not self.axis_system.is_homing_position_attained()
+
+        for i in range(self.axis_system.get_axes_count()):
+            axis = self.axis_system.get_axis_device(i)
+            logging.debug(f"{axis.get_device_name()}: {axis.get_actual_position()}")
 
         return AxisSystemPositionController_pb2.MoveToHomePosition_Responses()
 

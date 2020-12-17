@@ -55,15 +55,17 @@ class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSys
     implementation: Union[AxisSystemPositionControllerSimulation, AxisSystemPositionControllerReal]
     simulation_mode: bool
 
-    def __init__(self, axis_system, simulation_mode: bool = True):
+    def __init__(self, axis_system, jib_length: int, simulation_mode: bool = True):
         """
         Class initialiser.
 
         :param axis_system: The axis system that this feature shall operate on
+        :param jib_length: The capillary distance from the central axis of the pivot arm
         :param simulation_mode: Sets whether at initialisation the simulation mode is active or the real mode.
         """
 
         self.axis_system = axis_system
+        self.jib_length = jib_length
         self.simulation_mode = simulation_mode
         if simulation_mode:
             self.switch_to_simulation_mode()
@@ -92,7 +94,7 @@ class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSys
     def switch_to_real_mode(self):
         """Method that will automatically be called by the server when the real mode is requested."""
         self.simulation_mode = False
-        self._inject_implementation(AxisSystemPositionControllerReal(self.axis_system))
+        self._inject_implementation(AxisSystemPositionControllerReal(self.axis_system, self.jib_length))
 
     def MoveToPosition(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.CommandConfirmation:

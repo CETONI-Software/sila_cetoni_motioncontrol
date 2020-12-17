@@ -67,13 +67,15 @@ class MotionControlServer(QmixIOServer):
         self,
         cmd_args,
         axis_system: qmixmotion.AxisSystem,
-        io_channels,
+        jib_length: int,
+        io_channels = [],
         simulation_mode: bool = True):
         """
         Class initialiser
 
             :param cmd_args: Arguments that were given on the command line
             :param axis_system: The qmixmotion.AxisSystem object that this server shall use
+            :param jib_length: the capillary distance from the central axis of the pivot arm
             :param io_channels: (optional) I/O channels of the axis system
             :param simulation_mode: Sets whether at initialisation the simulation mode is active or the real mode
         """
@@ -99,6 +101,7 @@ class MotionControlServer(QmixIOServer):
         #  Register de.cetoni.motioncontrol.axis.AxisSystemPositionController
         self.AxisSystemPositionController_servicer = AxisSystemPositionController(
             axis_system=axis_system,
+            jib_length=jib_length,
             simulation_mode=self.simulation_mode
         )
         AxisSystemPositionController_pb2_grpc.add_AxisSystemPositionControllerServicer_to_server(
