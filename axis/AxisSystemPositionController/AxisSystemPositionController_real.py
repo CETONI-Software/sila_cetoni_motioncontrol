@@ -41,7 +41,8 @@ from typing import Any, Dict
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 
 # import SiLA errors
-from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAValidationError
+from impl.common.qmix_errors import DeviceError, SiLAFrameworkError, SiLAFrameworkErrorType, \
+    SiLAValidationError, SiLAExecutionError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2
@@ -96,6 +97,9 @@ class AxisSystemPositionControllerReal:
                 x_axis.get_position_max(),
                 y_axis.get_position_max()
             )
+
+        PROPERTY_SAFE_ROTATION_HEIGHT = 0
+        self.axis_system.set_device_property(PROPERTY_SAFE_ROTATION_HEIGHT, 1)
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
@@ -261,7 +265,20 @@ class AxisSystemPositionControllerReal:
         self.movement_uuid = str(uuid.uuid4())
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=self.movement_uuid)
 
-        self.axis_system.move_to_postion_xy(requested_position.x, requested_position.y, requested_velocity / 100)
+        try:
+            self.axis_system.move_to_postion_xy(requested_position.x, requested_position.y, requested_velocity / 100)
+        except DeviceError as err:
+            if err.errorcode == -1: # Operation not permitted
+                raise SiLAExecutionError(
+                    'MovementBlocked',
+                    'The movement of the axis system is blocked and rotation is ' \
+                    'not allowed. Rotation is only allowed if the upper limit sensor ' \
+                    'is on - that means if the lift axis is in its topmost position.'
+                )
+            else:
+                raise err
+
+
         logging.info(f"Started moving to {requested_position} with {requested_velocity}% of max velocity")
 
         # respond with UUID and lifetime of execution
