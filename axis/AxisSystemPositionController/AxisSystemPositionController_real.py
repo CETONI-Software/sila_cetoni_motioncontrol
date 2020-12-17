@@ -60,7 +60,6 @@ import shapely.ops as ops
 # import matplotlib.pyplot as plt
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
-from qmixsdk import qmixbus
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisSystemPositionControllerReal:
@@ -313,12 +312,7 @@ class AxisSystemPositionControllerReal:
         self.movement_uuid = ''
         time.sleep(0.6)
 
-        for i in range(self.axis_system.get_axes_count()):
-            axis = self.axis_system.get_axis_device(i)
-            logging.debug(f"{axis.get_device_name()}: {axis.get_actual_position()}")
-
         return AxisSystemPositionController_pb2.MoveToPosition_Responses()
-
 
 
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
@@ -336,18 +330,15 @@ class AxisSystemPositionControllerReal:
         """
 
         self._ensure_stopped()
-
+        time.sleep(0.6)
         self.axis_system.find_home()
 
         is_moving = True
         while is_moving:
             time.sleep(0.5)
             logging.info("Position: %s", self.axis_system.get_actual_position_xy())
-            is_moving = not self.axis_system.is_homing_position_attained()
-
-        for i in range(self.axis_system.get_axes_count()):
-            axis = self.axis_system.get_axis_device(i)
-            logging.debug(f"{axis.get_device_name()}: {axis.get_actual_position()}")
+            is_moving = not self.axis_system.is_homing_position_attained() \
+                and not self.axis_system.is_target_position_reached()
 
         return AxisSystemPositionController_pb2.MoveToHomePosition_Responses()
 
