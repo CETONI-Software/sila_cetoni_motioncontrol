@@ -34,8 +34,15 @@ import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
 
+from typing import Dict, Union
+
+from collections import namedtuple
+
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
+
+# import SiLA errors
+from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAValidationError
 
 # import gRPC modules for this feature
 from .gRPC import AxisPositionController_pb2 as AxisPositionController_pb2
@@ -44,6 +51,7 @@ from .gRPC import AxisPositionController_pb2 as AxisPositionController_pb2
 # import default arguments
 from .AxisPositionController_default_arguments import default_dict
 
+from qmixsdk.qmixmotion import Axis, AxisSystem, PositionUnit
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisPositionControllerReal:
@@ -52,433 +60,400 @@ class AxisPositionControllerReal:
         Allows to control motion systems like axis systems
     """
 
-    def __init__(self):
-        """Class initialiser"""
+    def __init__(self, axis_system: AxisSystem):
+        """
+        Class initialiser.
+
+        :param axis_system: The axis system that this feature shall operate on
+        """
+
+        self.axis_system = axis_system
+
+        self.METADATA_AXIS_IDENTIFIER = \
+            'sila-de.cetoni-motioncontrol.axis-axispositioncontroller-v1-metadata-axisidentifier-bin'
+
+        self.axes: Dict[str, Dict[str, Union[Axis, str]]] = {
+            self.axis_system.get_axis_device(i).get_device_name(): {
+                'device': self.axis_system.get_axis_device(i),
+                'movement_uuid': ''
+            }
+            for i in range(self.axis_system.get_axes_count())
+        }
+
+        for name, axis in self.axes.items():
+            unit = axis['device'].get_position_unit()
+            unit_string = (unit.prefix.name if unit.prefix.name != 'unit' else '') + unit.unitid.name
+            logging.debug(f"{name}, {unit_string}")
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
-    def _get_command_state(self, command_uuid: str) -> silaFW_pb2.ExecutionInfo:
+    def _get_axis_name(self, invocation_metadata: Dict) -> str:
         """
-        Method to fill an ExecutionInfo message from the SiLA server for observable commands
-
-        :param command_uuid: The uuid of the command for which to return the current state
-
-        :return: An execution info object with the current command state
+        Retrieves the axis name that is given in the `invocation_metadata` of a RPC.
+        If the metadatum is not present an appropriate error is raised.
         """
+        invocation_metadata = {key: value for key, value in invocation_metadata}
+        logging.debug(f"Received invocation metadata: {invocation_metadata}")
+        try:
+            return invocation_metadata[self.METADATA_AXIS_IDENTIFIER].decode('utf-8')
+        except KeyError:
+            raise SiLAFrameworkError(SiLAFrameworkErrorType.INVALID_METADATA,
+                                     'This Command requires the AxisIdentifier metadata!')
 
-        #: Enumeration of silaFW_pb2.ExecutionInfo.CommandStatus
-        command_status = silaFW_pb2.ExecutionInfo.CommandStatus.waiting
-        #: Real silaFW_pb2.Real(0...1)
-        command_progress = None
-        #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
-        command_estimated_remaining = None
-        #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
-        command_lifetime_of_execution = None
+    def _validate_position(self, axis: Dict[str, Union[Axis, str]], position):
+        """
+        Validates that the given position lies within the allowed range
+        for the given axis
+        """
+        min_position = axis['device'].get_position_min()
+        max_position = axis['device'].get_position_max()
 
-        # TODO: check the state of the command with the given uuid and return the correct information
-
-        # just return a default in this example
-        return silaFW_pb2.ExecutionInfo(
-            commandStatus=command_status,
-            progressInfo=(
-                command_progress if command_progress is not None else None
-            ),
-            estimatedRemainingTime=(
-                command_estimated_remaining if command_estimated_remaining is not None else None
-            ),
-            updatedLifetimeOfExecution=(
-                command_lifetime_of_execution if command_lifetime_of_execution is not None else None
+        if position < min_position or \
+            position > max_position:
+            raise SiLAValidationError(
+                'Position',
+                f'The given position {position} is not in the valid range '\
+                f'{min_position, max_position} for this axis.'
             )
-        )
+
+    def _validate_velocity(self, axis: Dict[str, Union[Axis, str]], velocity):
+        """
+        Validates that the given velocity lies within the allowed range
+        for the given axis
+        """
+        min_velocity = 0
+        max_velocity = axis['device'].get_velocity_max()
+
+        if velocity < min_velocity or \
+            velocity > max_velocity:
+            raise SiLAValidationError(
+                'Velocity',
+                f'The given velocity {velocity} is not in the valid range '\
+                f'{min_velocity, max_velocity} for this axis.'
+            )
+
+    def _validate_uuid(
+        self,
+        axis: Dict[str, Union[Axis, str]],
+        uuid: silaFW_pb2.CommandExecutionUUID, check_premature_call = False):
+        """
+        Checks the given UUID for validity (i.e. if this is the UUID of the current
+        movement command) and raises a SiLAFrameworkError if the UUID is not valid.
+        Additionally, if `check_premature_call` is set to `True` then it is also
+        checked that the axis system is not moving (this is only useful for
+        `..._Result` functions). If this check fails, the corresponding FrameworkError
+        will be raised, as well.
+
+        :param uuid: The UUID to check
+        :param check_premature_call: Whether to check if the axis system is still
+                                     moving and raise an error if it is.
+        """
+        # catch invalid CommandExecutionUUID:
+        if not uuid and axis['movement_uuid'] != uuid:
+            raise SiLAFrameworkError(
+                SiLAFrameworkErrorType.INVALID_COMMAND_EXECUTION_UUID
+            )
+
+        # catch premature command call
+        if check_premature_call and not axis['device'].is_target_position_reached():
+            raise SiLAFrameworkError(
+                SiLAFrameworkErrorType.COMMAND_EXECUTION_NOT_FINISHED
+            )
+
+    def _wait_movement_finished(self, axis: Axis):
+        """
+        The function waits until the last movement command for the given axis has finished
+        """
+
+        is_moving = True
+        while is_moving:
+            time.sleep(0.5)
+            logging.info("Position: %s", axis.get_actual_position())
+            yield silaFW_pb2.ExecutionInfo(
+                commandStatus=silaFW_pb2.ExecutionInfo.CommandStatus.running
+            )
+            is_moving = not axis.is_target_position_reached()
+
+        if not is_moving:
+            yield silaFW_pb2.ExecutionInfo(
+                commandStatus=silaFW_pb2.ExecutionInfo.CommandStatus.finishedSuccessfully
+            )
+        else:
+            yield silaFW_pb2.ExecutionInfo(
+                commandStatus=silaFW_pb2.ExecutionInfo.CommandStatus.finishedWithError
+            )
+            logging.error("An unexpected error occurred: %s", axis.read_last_error())
 
     def MoveToPosition(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.CommandConfirmation:
         """
         Executes the observable command "Move To Position"
             Move the axis to the given position with a certain velocity
-    
+
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to. Has to be in the range between MinimumPosition and MaximumPosition. See PositionUnit for the unit that is used for a specific axis. E.g. for rotational axis systems one of the axes needs a position specified in radians.
             request.Velocity (Velocity): The velocity value for the movement. Has to be in the range between MinimumVelocity and MaximumVelocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A command confirmation object with the following information:
             commandId: A command id with which this observable command can be referenced in future calls
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
-    
-        # initialise default values
-        #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
-        lifetime_of_execution: silaFW_pb2.Duration = None
-    
-        # TODO:
-        #   Execute the actual command
-        #   Optional: Generate a lifetime_of_execution
-    
-        # respond with UUID and lifetime of execution
-        command_uuid = silaFW_pb2.CommandExecutionUUID(value=str(uuid.uuid4()))
-        if lifetime_of_execution is not None:
-            return silaFW_pb2.CommandConfirmation(
-                commandExecutionUUID=command_uuid,
-                lifetimeOfExecution=lifetime_of_execution
-            )
-        else:
-            return silaFW_pb2.CommandConfirmation(
-                commandExecutionUUID=command_uuid
-            )
-    
+
+        requested_position = request.Position.value
+        requested_velocity = request.Velocity.Velocity.value
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+        self._validate_position(axis, requested_position)
+        self._validate_velocity(axis, requested_velocity)
+
+        axis['movement_uuid'] = str(uuid.uuid4())
+        command_uuid = silaFW_pb2.CommandExecutionUUID(value=axis['movement_uuid'])
+
+        axis['device'].move_to_position(requested_position, requested_velocity)
+        logging.info(f"Started moving to {requested_position} with velocity of {requested_velocity}")
+
+        return silaFW_pb2.CommandConfirmation(
+            commandExecutionUUID=command_uuid
+        )
+
     def MoveToPosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
         """
         Returns execution information regarding the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             commandId: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: An ExecutionInfo response stream for the command with the following fields:
             commandStatus: Status of the command (enumeration)
             progressInfo: Information on the progress of the command (0 to 1)
             estimatedRemainingTime: Estimate of the remaining time required to run the command
             updatedLifetimeOfExecution: An update on the execution lifetime
         """
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
         # Get the UUID of the command
-        command_uuid = request.value
-    
-        # Get the current state
-        execution_info = self._get_command_state(command_uuid=command_uuid)
-    
-        # construct the initial return dictionary in case while is not executed
-        return_values = {'commandStatus': execution_info.commandStatus}
-        if execution_info.HasField('progressInfo'):
-            return_values['progressInfo'] = execution_info.progressInfo
-        if execution_info.HasField('estimatedRemainingTime'):
-            return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
-        if execution_info.HasField('updatedLifetimeOfExecution'):
-            return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
-        # we loop only as long as the command is running
-        while execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.waiting \
-                or execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.running:
-            # TODO:
-            #   Evaluate the command status --> command_status. Options:
-            #       command_stats = silaFW_pb2.ExecutionInfo.CommandStatus.waiting
-            #       command_stats = silaFW_pb2.ExecutionInfo.CommandStatus.running
-            #       command_stats = silaFW_pb2.ExecutionInfo.CommandStatus.finishedSuccessfully
-            #       command_stats = silaFW_pb2.ExecutionInfo.CommandStatus.finishedWithError
-            #   Optional:
-            #       * Determine the progress (progressInfo)
-            #       * Determine the estimated remaining time
-            #       * Update the Lifetime of execution
-    
-            # Update all values
-            execution_info = self._get_command_state(command_uuid=command_uuid)
-    
-            # construct the return dictionary
-            return_values = {'commandStatus': execution_info.commandStatus}
-            if execution_info.HasField('progressInfo'):
-                return_values['progressInfo'] = execution_info.progressInfo
-            if execution_info.HasField('estimatedRemainingTime'):
-                return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
-            if execution_info.HasField('updatedLifetimeOfExecution'):
-                return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
-            yield silaFW_pb2.ExecutionInfo(**return_values)
-    
-            # we add a small delay to give the client a chance to keep up.
-            time.sleep(0.5)
-        else:
-            # one last time yield the status
-            yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+        self._validate_uuid(axis, request.value)
+
+        logging.info("Requested MoveToPosition_Info for movement (UUID: %s)", request.value)
+        logging.info("Current movement is UUID: %s", axis['movement_uuid'])
+
+        return self._wait_movement_finished(axis['device'])
+
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.MoveToPosition_Responses = None
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
         # Get the UUID of the command
-        command_uuid = request.value
-    
-        # TODO:
-        #   Add implementation of Real for command MoveToPosition here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.MoveToPosition_Responses(
-                **default_dict['MoveToPosition_Responses']
-            )
-    
-        return return_value
-    
-    
+        self._validate_uuid(axis, request.value, check_premature_call=True)
+
+        logging.info("Finished moving! (UUID: %s)", axis['movement_uuid'])
+        axis['movement_uuid'] = ''
+        time.sleep(0.6)
+
+        return AxisPositionController_pb2.MoveToPosition_Responses()
+
+
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.MoveToHomePosition_Responses:
         """
         Executes the unobservable command "Move To Home Position"
             Move the axis to its home position
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value = None
-    
-        # TODO:
-        #   Add implementation of Real for command MoveToHomePosition here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.MoveToHomePosition_Responses(
-                **default_dict['MoveToHomePosition_Responses']
-            )
-    
-        return return_value
-    
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+        axis['device'].find_home()
+
+        is_moving = True
+        while is_moving:
+            time.sleep(0.5)
+            logging.info("Position: %s", axis['device'].get_actual_position())
+            is_moving = not axis['device'].is_homing_position_attained()
+
+        return AxisPositionController_pb2.MoveToHomePosition_Responses()
+
+
     def StopMoving(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops axis movement of a single axis
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
-        # initialise the return value
-        return_value = None
-    
-        # TODO:
-        #   Add implementation of Real for command StopMoving here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.StopMoving_Responses(
-                **default_dict['StopMoving_Responses']
-            )
-    
-        return return_value
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+        axis['device'].stop_move()
+
+        return AxisPositionController_pb2.StopMoving_Responses()
+
 
     def Subscribe_Position(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Subscribe_Position_Responses:
         """
         Requests the observable property Position
             The current position of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             Position (Position): The current position of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Subscribe_Position_Responses = None
-    
-        # we could use a timeout here if we wanted
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
         while True:
-            # TODO:
-            #   Add implementation of Real for property Position here and write the resulting
-            #   response in return_value
-    
-            # create the default value
-            if return_value is None:
-                return_value = AxisPositionController_pb2.Subscribe_Position_Responses(
-                    **default_dict['Subscribe_Position_Responses']
-                )
-    
-    
-            yield return_value
-    
-    
+            position = axis['device'].get_actual_position()
+
+            yield AxisPositionController_pb2.Subscribe_Position_Responses(
+                Position=silaFW_pb2.Real(value=position)
+            )
+            time.sleep(0.5) # give client some time to catch up
+
+
     def Get_PositionUnit(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_PositionUnit_Responses:
         """
         Requests the unobservable property PositionUnit
             The position unit used for specifying the position of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             PositionUnit (PositionUnit): The position unit used for specifying the position of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_PositionUnit_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property PositionUnit here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_PositionUnit_Responses(
-                **default_dict['Get_PositionUnit_Responses']
-            )
-    
-        return return_value
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+        unit = axis['device'].get_position_unit()
+        unit_str = (unit.prefix.name if unit.prefix.name != 'unit' else '') + unit.unitid.name
+
+        return AxisPositionController_pb2.Get_PositionUnit_Responses(
+            PositionUnit=silaFW_pb2.String(value=unit_str)
+        )
+
     def Get_MinimumPosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MinimumPosition_Responses:
         """
         Requests the unobservable property Minimum Position
             The minimum position limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MinimumPosition (Minimum Position): The minimum position limit of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_MinimumPosition_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property MinimumPosition here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_MinimumPosition_Responses(
-                **default_dict['Get_MinimumPosition_Responses']
-            )
-    
-        return return_value
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
+        return AxisPositionController_pb2.Get_MinimumPosition_Responses(
+            MinimumPosition=silaFW_pb2.Real(value=axis['device'].get_position_min())
+        )
+
     def Get_MaximumPosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MaximumPosition_Responses:
         """
         Requests the unobservable property Maximum Position
             The maximum position limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MaximumPosition (Maximum Position): The maximum position limit of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_MaximumPosition_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property MaximumPosition here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_MaximumPosition_Responses(
-                **default_dict['Get_MaximumPosition_Responses']
-            )
-    
-        return return_value
-    
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
+        return AxisPositionController_pb2.Get_MaximumPosition_Responses(
+            MaximumPosition=silaFW_pb2.Real(value=axis['device'].get_position_max())
+        )
+
+
     def Get_MinimumVelocity(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MinimumVelocity_Responses:
         """
         Requests the unobservable property Minimum Velocity
             The minimum velocity limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MinimumVelocity (Minimum Velocity): The minimum velocity limit of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_MinimumVelocity_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property MinimumVelocity here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_MinimumVelocity_Responses(
-                **default_dict['Get_MinimumVelocity_Responses']
+
+        return AxisPositionController_pb2.Get_MinimumVelocity_Responses(
+            MinimumVelocity=AxisPositionController_pb2.DataType_Velocity(
+                Velocity=silaFW_pb2.Real(value=0)
             )
-    
-        return return_value
-    
+        )
+
+
     def Get_MaximumVelocity(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MaximumVelocity_Responses:
         """
         Requests the unobservable property Maximum Velocity
             The maximum velocity limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MaximumVelocity (Maximum Velocity): The maximum velocity limit of an axis
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_MaximumVelocity_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property MaximumVelocity here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_MaximumVelocity_Responses(
-                **default_dict['Get_MaximumVelocity_Responses']
+
+        axis = self.axes[self._get_axis_name(context.invocation_metadata())]
+
+        return AxisPositionController_pb2.Get_MaximumVelocity_Responses(
+            MaximumVelocity=AxisPositionController_pb2.DataType_Velocity(
+                Velocity=silaFW_pb2.Real(value=axis['device'].get_velocity_max())
             )
-    
-        return return_value
+        )
+
 
     def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses:
         """
         Requests the unobservable property FCPAffectedByMetadata Axis Identifier
             Specifies which Features/Commands/Properties of the SiLA server are affected by the Axis Identifier Metadata.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AffectedCalls (AffectedCalls): A string containing a list of Fully Qualified Identifiers of Features, Commands and Properties for which the SiLA Client Metadata is expected as part of the respective RPCs.
         """
-    
-        # initialise the return value
-        return_value: AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses = None
-    
-        # TODO:
-        #   Add implementation of Real for property FCPAffectedByMetadata_AxisIdentifier here and write the resulting response
-        #   in return_value
-    
-        # fallback to default
-        if return_value is None:
-            return_value = AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
-                **default_dict['Get_FCPAffectedByMetadata_AxisIdentifier_Responses']
-            )
-    
-        return return_value
+
+        return AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
+            AffectedCalls=[
+                silaFW_pb2.String(value="AxisPositionController"),
+            ]
+        )
