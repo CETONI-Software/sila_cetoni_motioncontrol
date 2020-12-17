@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\"AxisSystemPositionController.proto\x12\x42sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1\x1a\x13SiLAFramework.proto\"\xf1\x01\n\x11\x44\x61taType_Position\x12w\n\x08Position\x18\x01 \x01(\x0b\x32\x65.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position.Position_Struct\x1a\x63\n\x0fPosition_Struct\x12\'\n\x01X\x18\x01 \x01(\x0b\x32\x1c.sila2.org.silastandard.Real\x12\'\n\x01Y\x18\x02 \x01(\x0b\x32\x1c.sila2.org.silastandard.Real\"\xb4\x01\n\x19MoveToPosition_Parameters\x12g\n\x08Position\x18\x01 \x01(\x0b\x32U.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position\x12.\n\x08Velocity\x18\x02 \x01(\x0b\x32\x1c.sila2.org.silastandard.Real\"\x1a\n\x18MoveToPosition_Responses\"\x1f\n\x1dMoveToHomePosition_Parameters\"\x1e\n\x1cMoveToHomePosition_Responses\"\x17\n\x15StopMoving_Parameters\"\x16\n\x14StopMoving_Responses\"\x1f\n\x1dSubscribe_Position_Parameters\"\x87\x01\n\x1cSubscribe_Position_Responses\x12g\n\x08Position\x18\x01 \x01(\x0b\x32U.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position2\xdb\x08\n\x1c\x41xisSystemPositionController\x12\x9e\x01\n\x0eMoveToPosition\x12].sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Parameters\x1a+.sila2.org.silastandard.CommandConfirmation\"\x00\x12n\n\x13MoveToPosition_Info\x12,.sila2.org.silastandard.CommandExecutionUUID\x1a%.sila2.org.silastandard.ExecutionInfo\"\x00\x30\x01\x12\xa5\x01\n\x15MoveToPosition_Result\x12,.sila2.org.silastandard.CommandExecutionUUID\x1a\\.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Responses\"\x00\x12\xdb\x01\n\x12MoveToHomePosition\x12\x61.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Parameters\x1a`.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Responses\"\x00\x12\xc3\x01\n\nStopMoving\x12Y.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Parameters\x1aX.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Responses\"\x00\x12\xdd\x01\n\x12Subscribe_Position\x12\x61.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Parameters\x1a`.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Responses\"\x00\x30\x01\x62\x06proto3'
+  serialized_pb=b'\n\"AxisSystemPositionController.proto\x12\x42sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1\x1a\x13SiLAFramework.proto\"\xf1\x01\n\x11\x44\x61taType_Position\x12w\n\x08Position\x18\x01 \x01(\x0b\x32\x65.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position.Position_Struct\x1a\x63\n\x0fPosition_Struct\x12\'\n\x01X\x18\x01 \x01(\x0b\x32\x1c.sila2.org.silastandard.Real\x12\'\n\x01Y\x18\x02 \x01(\x0b\x32\x1c.sila2.org.silastandard.Real\"\xb7\x01\n\x19MoveToPosition_Parameters\x12g\n\x08Position\x18\x01 \x01(\x0b\x32U.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position\x12\x31\n\x08Velocity\x18\x02 \x01(\x0b\x32\x1f.sila2.org.silastandard.Integer\"\x1a\n\x18MoveToPosition_Responses\"\x1f\n\x1dMoveToHomePosition_Parameters\"\x1e\n\x1cMoveToHomePosition_Responses\"\x17\n\x15StopMoving_Parameters\"\x16\n\x14StopMoving_Responses\"\x1f\n\x1dSubscribe_Position_Parameters\"\x87\x01\n\x1cSubscribe_Position_Responses\x12g\n\x08Position\x18\x01 \x01(\x0b\x32U.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position2\xdb\x08\n\x1c\x41xisSystemPositionController\x12\x9e\x01\n\x0eMoveToPosition\x12].sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Parameters\x1a+.sila2.org.silastandard.CommandConfirmation\"\x00\x12n\n\x13MoveToPosition_Info\x12,.sila2.org.silastandard.CommandExecutionUUID\x1a%.sila2.org.silastandard.ExecutionInfo\"\x00\x30\x01\x12\xa5\x01\n\x15MoveToPosition_Result\x12,.sila2.org.silastandard.CommandExecutionUUID\x1a\\.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Responses\"\x00\x12\xdb\x01\n\x12MoveToHomePosition\x12\x61.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Parameters\x1a`.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Responses\"\x00\x12\xc3\x01\n\nStopMoving\x12Y.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Parameters\x1aX.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Responses\"\x00\x12\xdd\x01\n\x12Subscribe_Position\x12\x61.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Parameters\x1a`.sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Responses\"\x00\x30\x01\x62\x06proto3'
   ,
   dependencies=[SiLAFramework__pb2.DESCRIPTOR,])
 
@@ -132,7 +132,7 @@ _MOVETOPOSITION_PARAMETERS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=372,
-  serialized_end=552,
+  serialized_end=555,
 )
 
 
@@ -156,8 +156,8 @@ _MOVETOPOSITION_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=554,
-  serialized_end=580,
+  serialized_start=557,
+  serialized_end=583,
 )
 
 
@@ -181,8 +181,8 @@ _MOVETOHOMEPOSITION_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=582,
-  serialized_end=613,
+  serialized_start=585,
+  serialized_end=616,
 )
 
 
@@ -206,8 +206,8 @@ _MOVETOHOMEPOSITION_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=615,
-  serialized_end=645,
+  serialized_start=618,
+  serialized_end=648,
 )
 
 
@@ -231,8 +231,8 @@ _STOPMOVING_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=647,
-  serialized_end=670,
+  serialized_start=650,
+  serialized_end=673,
 )
 
 
@@ -256,8 +256,8 @@ _STOPMOVING_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=672,
-  serialized_end=694,
+  serialized_start=675,
+  serialized_end=697,
 )
 
 
@@ -281,8 +281,8 @@ _SUBSCRIBE_POSITION_PARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=696,
-  serialized_end=727,
+  serialized_start=699,
+  serialized_end=730,
 )
 
 
@@ -313,8 +313,8 @@ _SUBSCRIBE_POSITION_RESPONSES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=730,
-  serialized_end=865,
+  serialized_start=733,
+  serialized_end=868,
 )
 
 _DATATYPE_POSITION_POSITION_STRUCT.fields_by_name['X'].message_type = SiLAFramework__pb2._REAL
@@ -322,7 +322,7 @@ _DATATYPE_POSITION_POSITION_STRUCT.fields_by_name['Y'].message_type = SiLAFramew
 _DATATYPE_POSITION_POSITION_STRUCT.containing_type = _DATATYPE_POSITION
 _DATATYPE_POSITION.fields_by_name['Position'].message_type = _DATATYPE_POSITION_POSITION_STRUCT
 _MOVETOPOSITION_PARAMETERS.fields_by_name['Position'].message_type = _DATATYPE_POSITION
-_MOVETOPOSITION_PARAMETERS.fields_by_name['Velocity'].message_type = SiLAFramework__pb2._REAL
+_MOVETOPOSITION_PARAMETERS.fields_by_name['Velocity'].message_type = SiLAFramework__pb2._INTEGER
 _SUBSCRIBE_POSITION_RESPONSES.fields_by_name['Position'].message_type = _DATATYPE_POSITION
 DESCRIPTOR.message_types_by_name['DataType_Position'] = _DATATYPE_POSITION
 DESCRIPTOR.message_types_by_name['MoveToPosition_Parameters'] = _MOVETOPOSITION_PARAMETERS
@@ -415,8 +415,8 @@ _AXISSYSTEMPOSITIONCONTROLLER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=868,
-  serialized_end=1983,
+  serialized_start=871,
+  serialized_end=1986,
   methods=[
   _descriptor.MethodDescriptor(
     name='MoveToPosition',

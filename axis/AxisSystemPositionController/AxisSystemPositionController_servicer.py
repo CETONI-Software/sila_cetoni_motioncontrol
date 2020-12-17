@@ -104,7 +104,7 @@ class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSys
 
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to
-            request.Velocity (Velocity): A real value between 0 (exclusive) and 1 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 1 means, all axes travel with their maximum velocity. A value of 0.5 means, all axes travel with the half of the maximum velocity.
+            request.Velocity (Velocity): A real value between 0 (exclusive) and 100 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 100 means, all axes travel with their maximum velocity. A value of 50 means, all axes travel with the half of the maximum velocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
 
         :returns: A command confirmation object with the following information:

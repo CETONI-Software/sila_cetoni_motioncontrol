@@ -242,7 +242,7 @@ class AxisSystemPositionControllerReal:
 
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to
-            request.Velocity (Velocity): A real value between 0 (exclusive) and 1 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 1 means, all axes travel with their maximum velocity. A value of 0.5 means, all axes travel with the half of the maximum velocity.
+            request.Velocity (Velocity): A real value between 0 (exclusive) and 100 (inclusive) defining the relative speed at which all axes of the axis system should move.The velocity value is multiplied with the maximum velocity value of each axis. So a value of 100 means, all axes travel with their maximum velocity. A value of 50 means, all axes travel with the half of the maximum velocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
 
         :returns: A command confirmation object with the following information:
@@ -262,8 +262,8 @@ class AxisSystemPositionControllerReal:
         self.movement_uuid = str(uuid.uuid4())
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=self.movement_uuid)
 
-        self.axis_system.move_to_postion_xy(requested_position.x, requested_position.y, requested_velocity)
-        logging.info(f"Started moving to {requested_position} with {requested_velocity*100}% of max velocity")
+        self.axis_system.move_to_postion_xy(requested_position.x, requested_position.y, requested_velocity / 100)
+        logging.info(f"Started moving to {requested_position} with {requested_velocity}% of max velocity")
 
         # respond with UUID and lifetime of execution
         return silaFW_pb2.CommandConfirmation(
