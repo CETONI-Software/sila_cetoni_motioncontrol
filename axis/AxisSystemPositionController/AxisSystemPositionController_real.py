@@ -97,9 +97,15 @@ class AxisSystemPositionControllerReal:
                 x_axis.get_position_max(),
                 y_axis.get_position_max()
             )
+        # plt.plot(*self.positioning_shape.exterior.xy)
+        # plt.savefig('fig.png')
 
         PROPERTY_SAFE_ROTATION_HEIGHT = 0
-        self.axis_system.set_device_property(PROPERTY_SAFE_ROTATION_HEIGHT, 1)
+        try:
+            # safe rotation height only supported by rotAXYS (non-360) but not by others
+            self.axis_system.set_device_property(PROPERTY_SAFE_ROTATION_HEIGHT, 1)
+        except DeviceError:
+            pass
 
         logging.debug('Started server in mode: {mode}'.format(mode='Real'))
 
@@ -111,53 +117,63 @@ class AxisSystemPositionControllerReal:
         :param jib_length: The capillary distance from the central axis of the pivot arm
         """
 
-        # the number of line segments to approximate an arc-like shape
-        num_segments = 1000
+        if '360' in self.axis_system.get_device_name():
+            # circular shape for rotAXYS360
 
-        min_radius = self.axes['rotAXYS_1_Radius'].get_position_min()
-        max_radius = self.axes['rotAXYS_1_Radius'].get_position_max()
-        min_angle = self.axes['rotAXYS_1_Rotation'].get_position_min()
-        max_angle = self.axes['rotAXYS_1_Rotation'].get_position_max()
-        inner_angle = math.atan(jib_length / min_radius)
-        outer_angle = math.atan(jib_length / max_radius)
-        inner_angle_min = min_angle - inner_angle
-        inner_angle_max = max_angle - inner_angle
-        outer_angle_min = min_angle - outer_angle
-        outer_angle_max = max_angle - outer_angle
+            min_radius = self.axes['rotAXYS360_1_Radius'].get_position_min()
+            max_radius = self.axes['rotAXYS360_1_Radius'].get_position_max()
+            inner_radius = math.sqrt(min_radius ** 2 + jib_length ** 2)
+            outer_radius = math.sqrt(max_radius ** 2 + jib_length ** 2)
+            inner_circle = geom.Point(0, 0).buffer(inner_radius)
+            outer_circle = geom.Point(0, 0).buffer(outer_radius)
+            return geom.Polygon(outer_circle.exterior.coords, [inner_circle.exterior.coords])
 
-        # the inner arc
-        inner_radius = math.sqrt(min_radius ** 2 + jib_length ** 2) # 46.1546
-        inner_start_angle = math.degrees(-inner_angle_min) # 151.767
-        inner_end_angle = math.degrees(-inner_angle_max) # 46.8603
-        inner_theta = np.radians(np.linspace(inner_start_angle, inner_end_angle, num_segments))
-        inner_x = inner_radius * np.cos(inner_theta)
-        # we need to invert this because the coordinate system has a Y-axis that is flipped
-        inner_y = -inner_radius * np.sin(inner_theta)
+        else:
+            # arc-like shape for rotAXYS
 
-        inner_arc = geom.LineString(np.column_stack([inner_x, inner_y]))
+            # the number of line segments to approximate an arc-like shape
+            num_segments = 1000
 
-        # the outer arc
-        outer_radius = math.sqrt(max_radius ** 2 + jib_length ** 2) # 145.617
-        outer_start_angle = math.degrees(-outer_angle_min) # 135.913
-        outer_end_angle = math.degrees(-outer_angle_max) # 31.0069
-        outer_theta = np.radians(np.linspace(outer_start_angle, outer_end_angle, num_segments))
-        outer_x = outer_radius * np.cos(outer_theta)
-        # we need to invert this because the coordinate system has a Y-axis that is flipped
-        outer_y = -outer_radius * np.sin(outer_theta)
+            min_radius = self.axes['rotAXYS_1_Radius'].get_position_min()
+            max_radius = self.axes['rotAXYS_1_Radius'].get_position_max()
+            min_angle = self.axes['rotAXYS_1_Rotation'].get_position_min()
+            max_angle = self.axes['rotAXYS_1_Rotation'].get_position_max()
+            inner_angle = math.atan(jib_length / min_radius)
+            outer_angle = math.atan(jib_length / max_radius)
+            inner_angle_min = min_angle - inner_angle
+            inner_angle_max = max_angle - inner_angle
+            outer_angle_min = min_angle - outer_angle
+            outer_angle_max = max_angle - outer_angle
 
-        outer_arc = geom.LineString(np.column_stack([outer_x, outer_y]))
+            # the inner arc
+            inner_radius = math.sqrt(min_radius ** 2 + jib_length ** 2) # 46.1546
+            inner_start_angle = math.degrees(-inner_angle_min) # 151.767
+            inner_end_angle = math.degrees(-inner_angle_max) # 46.8603
+            inner_theta = np.radians(np.linspace(inner_start_angle, inner_end_angle, num_segments))
+            inner_x = inner_radius * np.cos(inner_theta)
+            # we need to invert this because the coordinate system has a Y-axis that is flipped
+            inner_y = -inner_radius * np.sin(inner_theta)
 
-        # connect the first and last points of both arcs to get a closed shape
-        left_bound = geom.LineString([inner_arc.coords[0], outer_arc.coords[0]])
-        logging.debug(f"left_bound: {left_bound}")
-        right_bound = geom.LineString([inner_arc.coords[-1], outer_arc.coords[-1]])
-        logging.debug(f"right_bound: {right_bound}")
+            inner_arc = geom.LineString(np.column_stack([inner_x, inner_y]))
 
-        arc = ops.linemerge([left_bound, inner_arc, outer_arc, right_bound])
-        # plt.plot(*arc.xy)
-        # plt.savefig('fig.png')
+            # the outer arc
+            outer_radius = math.sqrt(max_radius ** 2 + jib_length ** 2) # 145.617
+            outer_start_angle = math.degrees(-outer_angle_min) # 135.913
+            outer_end_angle = math.degrees(-outer_angle_max) # 31.0069
+            outer_theta = np.radians(np.linspace(outer_start_angle, outer_end_angle, num_segments))
+            outer_x = outer_radius * np.cos(outer_theta)
+            # we need to invert this because the coordinate system has a Y-axis that is flipped
+            outer_y = -outer_radius * np.sin(outer_theta)
 
-        return geom.Polygon(arc)
+            outer_arc = geom.LineString(np.column_stack([outer_x, outer_y]))
+
+            # connect the first and last points of both arcs to get a closed shape
+            left_bound = geom.LineString([inner_arc.coords[0], outer_arc.coords[0]])
+            logging.debug(f"left_bound: {left_bound}")
+            right_bound = geom.LineString([inner_arc.coords[-1], outer_arc.coords[-1]])
+            logging.debug(f"right_bound: {right_bound}")
+
+            return geom.Polygon(ops.linemerge([left_bound, inner_arc, outer_arc, right_bound]))
 
     def _ensure_stopped(self):
         """
