@@ -33,7 +33,7 @@ import logging
 import argparse
 
 # Import our server base class
-from qmixio.QmixIO_server import QmixIOServer
+from ..io.QmixIO_server import QmixIOServer
 
 # Import gRPC libraries of features
 from impl.de.cetoni.motioncontrol.axis.AxisSystemControlService.gRPC import AxisSystemControlService_pb2
