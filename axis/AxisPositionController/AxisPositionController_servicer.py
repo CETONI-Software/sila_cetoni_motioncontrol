@@ -144,7 +144,8 @@ class AxisPositionController(AxisPositionController_pb2_grpc.AxisPositionControl
             )
         )
         try:
-            return self.implementation.MoveToPosition_Info(request, context)
+            for value in self.implementation.MoveToPosition_Info(request, context):
+                yield value
         except (SiLAError, DeviceError) as err:
             if isinstance(err, DeviceError):
                 err = QmixSDKSiLAError(err)

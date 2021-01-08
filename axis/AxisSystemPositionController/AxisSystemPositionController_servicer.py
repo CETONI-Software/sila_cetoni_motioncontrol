@@ -146,7 +146,8 @@ class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSys
             )
         )
         try:
-            return self.implementation.MoveToPosition_Info(request, context)
+            for value in self.implementation.MoveToPosition_Info(request, context):
+                yield value
         except (SiLAError, DeviceError) as err:
             if isinstance(err, DeviceError):
                 err = QmixSDKSiLAError(err)
@@ -246,7 +247,8 @@ class AxisSystemPositionController(AxisSystemPositionController_pb2_grpc.AxisSys
             )
         )
         try:
-            return self.implementation.Subscribe_Position(request, context)
+            for value in self.implementation.Subscribe_Position(request, context):
+                yield value
         except SiLAError as err:
             err.raise_rpc_error(context=context)
 
