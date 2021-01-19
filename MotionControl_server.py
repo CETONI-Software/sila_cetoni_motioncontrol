@@ -86,7 +86,7 @@ class MotionControlServer(QmixIOServer):
         """
         super().__init__(cmd_args, io_channels, simulation_mode=simulation_mode)
 
-        data_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
+        data_path = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..',
                                                  'features', 'de', 'cetoni', 'motioncontrol', 'axis'))
 
         # registering features
