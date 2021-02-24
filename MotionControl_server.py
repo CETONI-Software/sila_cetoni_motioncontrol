@@ -100,7 +100,7 @@ class MotionControlServer(QmixIOServer):
             self.AxisSystemControlService_servicer,
             self.grpc_server
         )
-        self.add_feature(feature_id='AxisSystemControlService',
+        self.add_feature(feature_id='de.cetoni/axis/AxisSystemControlService/v1',
                          servicer=self.AxisSystemControlService_servicer,
                          data_path=data_path)
         #  Register de.cetoni.motioncontrol.axis.AxisSystemPositionController
@@ -113,7 +113,7 @@ class MotionControlServer(QmixIOServer):
             self.AxisSystemPositionController_servicer,
             self.grpc_server
         )
-        self.add_feature(feature_id='AxisSystemPositionController',
+        self.add_feature(feature_id='de.cetoni/axis/AxisSystemPositionController/v1',
                          servicer=self.AxisSystemPositionController_servicer,
                          data_path=data_path)
         #  Register de.cetoni.motioncontrol.axis.AxisPositionController
@@ -125,7 +125,7 @@ class MotionControlServer(QmixIOServer):
             self.AxisPositionController_servicer,
             self.grpc_server
         )
-        self.add_feature(feature_id='AxisPositionController',
+        self.add_feature(feature_id='de.cetoni/axis/AxisPositionController/v1',
                          servicer=self.AxisPositionController_servicer,
                          data_path=data_path)
 
@@ -140,7 +140,7 @@ class MotionControlServer(QmixIOServer):
             self.ShutdownController_servicer,
             self.grpc_server
         )
-        self.add_feature(feature_id='ShutdownController',
+        self.add_feature(feature_id='de.cetoni/core/ShutdownController/v1',
                             servicer=self.ShutdownController_servicer,
                             data_path=data_path.replace(os.path.join('motioncontrol', 'axis'), 'core'))
 
