@@ -1,7 +1,7 @@
 """
 ________________________________________________________________________
 
-:PROJECT: SiLA2_python
+:PROJECT: sila_cetoni
 
 *Axis Position Controller*
 
@@ -96,25 +96,25 @@ class AxisPositionControllerSimulation:
         """
         Executes the observable command "Move To Position"
             Move the axis to the given position with a certain velocity
-    
+
         :param request: gRPC request containing the parameters passed:
             request.Position (Position): The position to move to. Has to be in the range between MinimumPosition and MaximumPosition. See PositionUnit for the unit that is used for a specific axis. E.g. for rotational axis systems one of the axes needs a position specified in radians.
             request.Velocity (Velocity): The velocity value for the movement. Has to be in the range between MinimumVelocity and MaximumVelocity.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A command confirmation object with the following information:
             commandId: A command id with which this observable command can be referenced in future calls
             lifetimeOfExecution: The (maximum) lifetime of this command call.
         """
-    
+
         # initialise default values
         #: Duration silaFW_pb2.Duration(seconds=<seconds>, nanos=<nanos>)
         lifetime_of_execution: silaFW_pb2.Duration = None
-    
+
         # TODO:
         #   Execute the actual command
         #   Optional: Generate a lifetime_of_execution
-    
+
         # respond with UUID and lifetime of execution
         command_uuid = silaFW_pb2.CommandExecutionUUID(value=str(uuid.uuid4()))
         if lifetime_of_execution is not None:
@@ -126,16 +126,16 @@ class AxisPositionControllerSimulation:
             return silaFW_pb2.CommandConfirmation(
                 commandExecutionUUID=command_uuid
             )
-    
+
     def MoveToPosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
         """
         Returns execution information regarding the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             commandId: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: An ExecutionInfo response stream for the command with the following fields:
             commandStatus: Status of the command (enumeration)
             progressInfo: Information on the progress of the command (0 to 1)
@@ -144,10 +144,10 @@ class AxisPositionControllerSimulation:
         """
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # Get the current state
         execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
         # construct the initial return dictionary in case while is not executed
         return_values = {'commandStatus': execution_info.commandStatus}
         if execution_info.HasField('progressInfo'):
@@ -156,7 +156,7 @@ class AxisPositionControllerSimulation:
             return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
         if execution_info.HasField('updatedLifetimeOfExecution'):
             return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
         # we loop only as long as the command is running
         while execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.waiting \
                 or execution_info.commandStatus == silaFW_pb2.ExecutionInfo.CommandStatus.running:
@@ -170,10 +170,10 @@ class AxisPositionControllerSimulation:
             #       * Determine the progress (progressInfo)
             #       * Determine the estimated remaining time
             #       * Update the Lifetime of execution
-    
+
             # Update all values
             execution_info = self._get_command_state(command_uuid=command_uuid)
-    
+
             # construct the return dictionary
             return_values = {'commandStatus': execution_info.commandStatus}
             if execution_info.HasField('progressInfo'):
@@ -182,277 +182,277 @@ class AxisPositionControllerSimulation:
                 return_values['estimatedRemainingTime'] = execution_info.estimatedRemainingTime
             if execution_info.HasField('updatedLifetimeOfExecution'):
                 return_values['updatedLifetimeOfExecution'] = execution_info.updatedLifetimeOfExecution
-    
+
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
             # we add a small delay to give the client a chance to keep up.
             time.sleep(0.5)
         else:
             # one last time yield the status
             yield silaFW_pb2.ExecutionInfo(**return_values)
-    
+
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.MoveToPosition_Responses:
         """
         Returns the final result of the command call :meth:`~.MoveToPosition`.
-    
+
         :param request: A request object with the following properties
             CommandExecutionUUID: The UUID of the command executed.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.MoveToPosition_Responses = None
-    
+
         # Get the UUID of the command
         command_uuid = request.value
-    
+
         # TODO:
         #   Add implementation of Simulation for command MoveToPosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.MoveToPosition_Responses(
                 **default_dict['MoveToPosition_Responses']
             )
-    
+
         return return_value
-    
-    
+
+
     def MoveToHomePosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.MoveToHomePosition_Responses:
         """
         Executes the unobservable command "Move To Home Position"
             Move the axis to its home position
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
         return_value = None
-    
+
         # TODO:
         #   Add implementation of Simulation for command MoveToHomePosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.MoveToHomePosition_Responses(
                 **default_dict['MoveToHomePosition_Responses']
             )
-    
+
         return return_value
-    
-    
+
+
     def StopMoving(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.StopMoving_Responses:
         """
         Executes the unobservable command "Stop Moving"
             Immediately stops axis movement of a single axis
-    
+
         :param request: gRPC request containing the parameters passed:
             request.EmptyParameter (Empty Parameter): An empty parameter data type used if no parameter is required.
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: The return object defined for the command with the following fields:
             EmptyResponse (Empty Response): An empty response data type used if no response is required.
         """
-    
+
         # initialise the return value
         return_value = None
-    
+
         # TODO:
         #   Add implementation of Simulation for command StopMoving here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.StopMoving_Responses(
                 **default_dict['StopMoving_Responses']
             )
-    
+
         return return_value
-    
+
 
     def Subscribe_Position(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Subscribe_Position_Responses:
         """
         Requests the observable property Position
             The current position of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             Position (Position): The current position of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Subscribe_Position_Responses = None
-    
+
         # we could use a timeout here if we wanted
         while True:
             # TODO:
             #   Add implementation of Simulation for property Position here and write the resulting
             #   response in return_value
-    
+
             # create the default value
             if return_value is None:
                 return_value = AxisPositionController_pb2.Subscribe_Position_Responses(
                     **default_dict['Subscribe_Position_Responses']
                 )
-    
-    
+
+
             yield return_value
-    
-    
+
+
     def Get_PositionUnit(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_PositionUnit_Responses:
         """
         Requests the unobservable property PositionUnit
             The position unit used for specifying the position of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             PositionUnit (PositionUnit): The position unit used for specifying the position of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_PositionUnit_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property PositionUnit here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_PositionUnit_Responses(
                 **default_dict['Get_PositionUnit_Responses']
             )
-    
+
         return return_value
-    
+
     def Get_MinimumPosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MinimumPosition_Responses:
         """
         Requests the unobservable property Minimum Position
             The minimum position limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MinimumPosition (Minimum Position): The minimum position limit of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_MinimumPosition_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property MinimumPosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_MinimumPosition_Responses(
                 **default_dict['Get_MinimumPosition_Responses']
             )
-    
+
         return return_value
-    
+
     def Get_MaximumPosition(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MaximumPosition_Responses:
         """
         Requests the unobservable property Maximum Position
             The maximum position limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MaximumPosition (Maximum Position): The maximum position limit of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_MaximumPosition_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property MaximumPosition here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_MaximumPosition_Responses(
                 **default_dict['Get_MaximumPosition_Responses']
             )
-    
+
         return return_value
-    
+
     def Get_MinimumVelocity(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MinimumVelocity_Responses:
         """
         Requests the unobservable property Minimum Velocity
             The minimum velocity limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MinimumVelocity (Minimum Velocity): The minimum velocity limit of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_MinimumVelocity_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property MinimumVelocity here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_MinimumVelocity_Responses(
                 **default_dict['Get_MinimumVelocity_Responses']
             )
-    
+
         return return_value
-    
+
     def Get_MaximumVelocity(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.Get_MaximumVelocity_Responses:
         """
         Requests the unobservable property Maximum Velocity
             The maximum velocity limit of an axis
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             MaximumVelocity (Maximum Velocity): The maximum velocity limit of an axis
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_MaximumVelocity_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property MaximumVelocity here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_MaximumVelocity_Responses(
                 **default_dict['Get_MaximumVelocity_Responses']
             )
-    
+
         return return_value
 
     def Get_FCPAffectedByMetadata_AxisIdentifier(self, request, context: grpc.ServicerContext) \
@@ -460,25 +460,25 @@ class AxisPositionControllerSimulation:
         """
         Requests the unobservable property FCPAffectedByMetadata Axis Identifier
             Specifies which Features/Commands/Properties of the SiLA server are affected by the Axis Identifier Metadata.
-    
+
         :param request: An empty gRPC request object (properties have no parameters)
         :param context: gRPC :class:`~grpc.ServicerContext` object providing gRPC-specific information
-    
+
         :returns: A response object with the following fields:
             AffectedCalls (AffectedCalls): A string containing a list of Fully Qualified Identifiers of Features, Commands and Properties for which the SiLA Client Metadata is expected as part of the respective RPCs.
         """
-    
+
         # initialise the return value
         return_value: AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses = None
-    
+
         # TODO:
         #   Add implementation of Simulation for property FCPAffectedByMetadata_AxisIdentifier here and write the resulting response
         #   in return_value
-    
+
         # fallback to default
         if return_value is None:
             return_value = AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
                 **default_dict['Get_FCPAffectedByMetadata_AxisIdentifier_Responses']
             )
-    
+
         return return_value

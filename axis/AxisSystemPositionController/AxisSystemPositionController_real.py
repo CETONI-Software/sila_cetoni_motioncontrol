@@ -1,7 +1,7 @@
 """
 ________________________________________________________________________
 
-:PROJECT: SiLA2_python
+:PROJECT: sila_cetoni
 
 *Axis System Position Controller*
 
@@ -30,7 +30,6 @@ __version__ = "0.1.0"
 
 # import general packages
 import logging
-from os import X_OK
 import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
