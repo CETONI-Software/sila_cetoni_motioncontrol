@@ -95,7 +95,9 @@ class AxisPositionControllerReal:
         invocation_metadata = {key: value for key, value in invocation_metadata}
         logging.debug(f"Received invocation metadata: {invocation_metadata}")
         try:
-            return invocation_metadata[self.METADATA_AXIS_IDENTIFIER].decode('utf-8')
+            message = AxisPositionController_pb2.Metadata_AxisIdentifier()
+            message.ParseFromString(invocation_metadata[self.METADATA_AXIS_IDENTIFIER])
+            return message.AxisIdentifier.value
         except KeyError:
             raise SiLAFrameworkError(SiLAFrameworkErrorType.INVALID_METADATA,
                                      'This Command requires the AxisIdentifier metadata!')
@@ -454,6 +456,6 @@ class AxisPositionControllerReal:
 
         return AxisPositionController_pb2.Get_FCPAffectedByMetadata_AxisIdentifier_Responses(
             AffectedCalls=[
-                silaFW_pb2.String(value="AxisPositionController"),
+                silaFW_pb2.String(value="de.cetoni/motioncontrol.axis/AxisPositionController/v1"),
             ]
         )
