@@ -14,11 +14,11 @@ from .gRPC import AxisPositionController_pb2 as pb2
 #   for the use in data type identifiers
 default_dict = dict()
 default_dict['DataType_Velocity'] = {
-    'Velocity': silaFW_pb2.Real(value=0.0)
+    'Velocity': silaFW_pb2.Real(value=1.0)
 }
 
 default_dict['MoveToPosition_Parameters'] = {
-    'Position': silaFW_pb2.Real(value=0.0),
+    'Position': silaFW_pb2.Real(value=1.0),
     'Velocity': pb2.DataType_Velocity(**default_dict['DataType_Velocity'])
 }
 
@@ -43,7 +43,7 @@ default_dict['StopMoving_Responses'] = {
 }
 
 default_dict['Subscribe_Position_Responses'] = {
-    'Position': silaFW_pb2.Real(value=0.0)
+    'Position': silaFW_pb2.Real(value=1.0)
 }
 
 default_dict['Get_PositionUnit_Responses'] = {
@@ -51,11 +51,11 @@ default_dict['Get_PositionUnit_Responses'] = {
 }
 
 default_dict['Get_MinimumPosition_Responses'] = {
-    'MinimumPosition': silaFW_pb2.Real(value=0.0)
+    'MinimumPosition': silaFW_pb2.Real(value=1.0)
 }
 
 default_dict['Get_MaximumPosition_Responses'] = {
-    'MaximumPosition': silaFW_pb2.Real(value=0.0)
+    'MaximumPosition': silaFW_pb2.Real(value=1.0)
 }
 
 default_dict['Get_MinimumVelocity_Responses'] = {
