@@ -55,6 +55,20 @@ from qmixsdk.qmixmotion import Axis, AxisSystem, PositionUnit
 
 from . import METADATA_AXIS_IDENTIFIER
 
+class MovableAxis:
+    """
+    A small wrapper around qmixmotion.Axis that adds a member for the current UUID
+    of the axis' movement
+    """
+
+    device: Axis
+    uuid: silaFW_pb2.CommandExecutionUUID
+
+    def __init__(self, device: Axis, uuid: silaFW_pb2.CommandExecutionUUID = None):
+        self.device = device
+        self.uuid = uuid
+
+
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisPositionControllerReal:
     """
@@ -71,16 +85,14 @@ class AxisPositionControllerReal:
 
         self.axis_system = axis_system
 
-        self.axes: Dict[str, Dict[str, Union[Axis, str]]] = {
-            self.axis_system.get_axis_device(i).get_device_name(): {
-                'device': self.axis_system.get_axis_device(i),
-                'movement_uuid': ''
-            }
+        self.axes: Dict[str, MovableAxis] = {
+            self.axis_system.get_axis_device(i).get_device_name():
+                MovableAxis(self.axis_system.get_axis_device(i))
             for i in range(self.axis_system.get_axes_count())
         }
 
         for name, axis in self.axes.items():
-            unit = axis['device'].get_position_unit()
+            unit = axis.device.get_position_unit()
             unit_string = (unit.prefix.name if unit.prefix.name != 'unit' else '') + unit.unitid.name
             logging.debug(f"{name}, {unit_string}")
 
@@ -101,7 +113,7 @@ class AxisPositionControllerReal:
             raise SiLAFrameworkError(SiLAFrameworkErrorType.INVALID_METADATA,
                                      'This Command requires the AxisIdentifier metadata!')
 
-    def _get_axis(self, invocation_metadata: Dict) -> Dict[str, Union[Axis, str]]:
+    def _get_axis(self, invocation_metadata: Dict) -> MovableAxis:
         """
         Retrieves the axis that is requested by the `invocation_metadata` of a RPC.
         If the axis cannot be found an appropriate error is raised.
@@ -114,41 +126,41 @@ class AxisPositionControllerReal:
             raise SiLAFrameworkError(SiLAFrameworkErrorType.INVALID_METADATA,
                                      f'Axis {axis_name} is invalid.')
 
-    def _validate_position(self, axis: Dict[str, Union[Axis, str]], position):
+    def _validate_position(self, axis: MovableAxis, position):
         """
         Validates that the given position lies within the allowed range
         for the given axis
         """
-        min_position = axis['device'].get_position_min()
-        max_position = axis['device'].get_position_max()
+        min_position = axis.device.get_position_min()
+        max_position = axis.device.get_position_max()
 
         if position < min_position or \
             position > max_position:
             raise SiLAValidationError(
-                'Position',
+                'de.cetoni/motioncontrol.axis/AxisPositionController/v1/Command/MoveToPosition/Parameter/Position',
                 f'The given position {position} is not in the valid range '\
                 f'{min_position, max_position} for this axis.'
             )
 
-    def _validate_velocity(self, axis: Dict[str, Union[Axis, str]], velocity):
+    def _validate_velocity(self, axis: MovableAxis, velocity):
         """
         Validates that the given velocity lies within the allowed range
         for the given axis
         """
         min_velocity = 0
-        max_velocity = axis['device'].get_velocity_max()
+        max_velocity = axis.device.get_velocity_max()
 
         if velocity < min_velocity or \
             velocity > max_velocity:
             raise SiLAValidationError(
-                'Velocity',
+                'de.cetoni/motioncontrol.axis/AxisPositionController/v1/Command/MoveToPosition/Parameter/Velocity',
                 f'The given velocity {velocity} is not in the valid range '\
                 f'{min_velocity, max_velocity} for this axis.'
             )
 
     def _validate_uuid(
         self,
-        axis: Dict[str, Union[Axis, str]],
+        axis: MovableAxis,
         uuid: silaFW_pb2.CommandExecutionUUID, check_premature_call = False):
         """
         Checks the given UUID for validity (i.e. if this is the UUID of the current
@@ -163,13 +175,13 @@ class AxisPositionControllerReal:
                                      moving and raise an error if it is.
         """
         # catch invalid CommandExecutionUUID:
-        if not uuid and axis['movement_uuid'] != uuid:
+        if not uuid and axis.uuid != uuid:
             raise SiLAFrameworkError(
                 SiLAFrameworkErrorType.INVALID_COMMAND_EXECUTION_UUID
             )
 
         # catch premature command call
-        if check_premature_call and not axis['device'].is_target_position_reached():
+        if check_premature_call and not axis.device.is_target_position_reached():
             raise SiLAFrameworkError(
                 SiLAFrameworkErrorType.COMMAND_EXECUTION_NOT_FINISHED
             )
@@ -221,15 +233,12 @@ class AxisPositionControllerReal:
         self._validate_position(axis, requested_position)
         self._validate_velocity(axis, requested_velocity)
 
-        axis['movement_uuid'] = str(uuid.uuid4())
-        command_uuid = silaFW_pb2.CommandExecutionUUID(value=axis['movement_uuid'])
+        axis.uuid = silaFW_pb2.CommandExecutionUUID(value=str(uuid.uuid4()))
 
-        axis['device'].move_to_position(requested_position, requested_velocity)
+        axis.device.move_to_position(requested_position, requested_velocity)
         logging.info(f"Started moving to {requested_position} with velocity of {requested_velocity}")
 
-        return silaFW_pb2.CommandConfirmation(
-            commandExecutionUUID=command_uuid
-        )
+        return silaFW_pb2.CommandConfirmation(commandExecutionUUID=axis.uuid)
 
     def MoveToPosition_Info(self, request, context: grpc.ServicerContext) \
             -> silaFW_pb2.ExecutionInfo:
@@ -252,9 +261,9 @@ class AxisPositionControllerReal:
         self._validate_uuid(axis, request.value)
 
         logging.info("Requested MoveToPosition_Info for movement (UUID: %s)", request.value)
-        logging.info("Current movement is UUID: %s", axis['movement_uuid'])
+        logging.info("Current movement is UUID: %s", axis.uuid)
 
-        return self._wait_movement_finished(axis['device'])
+        return self._wait_movement_finished(axis.device)
 
     def MoveToPosition_Result(self, request, context: grpc.ServicerContext) \
             -> AxisPositionController_pb2.MoveToPosition_Responses:
@@ -274,8 +283,8 @@ class AxisPositionControllerReal:
         # Get the UUID of the command
         self._validate_uuid(axis, request.value, check_premature_call=True)
 
-        logging.info("Finished moving! (UUID: %s)", axis['movement_uuid'])
-        axis['movement_uuid'] = ''
+        logging.info("Finished moving! (UUID: %s)", axis.uuid)
+        axis.uuid = ''
         time.sleep(0.6)
 
         return AxisPositionController_pb2.MoveToPosition_Responses()
@@ -296,13 +305,13 @@ class AxisPositionControllerReal:
         """
 
         axis = self._get_axis(context.invocation_metadata())
-        axis.find_home()
+        axis.device.find_home()
 
         is_moving = True
         while is_moving:
             time.sleep(0.5)
-            logging.info("Position: %s", axis['device'].get_actual_position())
-            is_moving = not axis['device'].is_homing_position_attained()
+            logging.info("Position: %s", axis.device.get_actual_position())
+            is_moving = not axis.device.is_homing_position_attained()
 
         return AxisPositionController_pb2.MoveToHomePosition_Responses()
 
@@ -322,7 +331,7 @@ class AxisPositionControllerReal:
         """
 
         axis = self._get_axis(context.invocation_metadata())
-        axis['device'].stop_move()
+        axis.device.stop_move()
 
         return AxisPositionController_pb2.StopMoving_Responses()
 
@@ -343,7 +352,7 @@ class AxisPositionControllerReal:
         axis = self._get_axis(context.invocation_metadata())
 
         while True:
-            position = axis['device'].get_actual_position()
+            position = axis.device.get_actual_position()
 
             yield AxisPositionController_pb2.Subscribe_Position_Responses(
                 Position=silaFW_pb2.Real(value=position)
@@ -365,7 +374,7 @@ class AxisPositionControllerReal:
         """
 
         axis = self._get_axis(context.invocation_metadata())
-        unit = axis['device'].get_position_unit()
+        unit = axis.device.get_position_unit()
         unit_str = (unit.prefix.name if unit.prefix.name != 'unit' else '') + unit.unitid.name
 
         return AxisPositionController_pb2.Get_PositionUnit_Responses(
@@ -388,7 +397,7 @@ class AxisPositionControllerReal:
         axis = self._get_axis(context.invocation_metadata())
 
         return AxisPositionController_pb2.Get_MinimumPosition_Responses(
-            MinimumPosition=silaFW_pb2.Real(value=axis['device'].get_position_min())
+            MinimumPosition=silaFW_pb2.Real(value=axis.device.get_position_min())
         )
 
     def Get_MaximumPosition(self, request, context: grpc.ServicerContext) \
@@ -407,7 +416,7 @@ class AxisPositionControllerReal:
         axis = self._get_axis(context.invocation_metadata())
 
         return AxisPositionController_pb2.Get_MaximumPosition_Responses(
-            MaximumPosition=silaFW_pb2.Real(value=axis['device'].get_position_max())
+            MaximumPosition=silaFW_pb2.Real(value=axis.device.get_position_max())
         )
 
 
@@ -448,7 +457,7 @@ class AxisPositionControllerReal:
 
         return AxisPositionController_pb2.Get_MaximumVelocity_Responses(
             MaximumVelocity=AxisPositionController_pb2.DataType_Velocity(
-                Velocity=silaFW_pb2.Real(value=axis['device'].get_velocity_max())
+                Velocity=silaFW_pb2.Real(value=axis.device.get_velocity_max())
             )
         )
 

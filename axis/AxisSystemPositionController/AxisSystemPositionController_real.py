@@ -225,7 +225,7 @@ class AxisSystemPositionControllerReal:
             nearest_point, dummy = ops.nearest_points(self.positioning_shape, point)
             logging.debug(f"nearest: {nearest_point}, other: {dummy}")
             raise SiLAValidationError(
-            'Position',
+            'de.cetoni/motioncontrol.axis/AxisSystemPositionController/v1/Command/MoveToPosition/Parameter/Position',
             f'The given Position {point.x, point.y} is not within the valid '\
             'positioning range for the axis system! The nearest valid position is '
             f'({nearest_point.x:.2f}, {nearest_point.y:.2f}).'
@@ -287,12 +287,7 @@ class AxisSystemPositionControllerReal:
             self.axis_system.move_to_postion_xy(requested_position.x, requested_position.y, requested_velocity / 100)
         except DeviceError as err:
             if err.errorcode == -1: # Operation not permitted
-                raise SiLAExecutionError(
-                    'MovementBlocked',
-                    'The movement of the axis system is blocked and rotation is ' \
-                    'not allowed. Rotation is only allowed if the upper limit sensor ' \
-                    'is on - that means if the lift axis is in its topmost position.'
-                )
+                raise MovementBlockedError()
             else:
                 raise err
 
