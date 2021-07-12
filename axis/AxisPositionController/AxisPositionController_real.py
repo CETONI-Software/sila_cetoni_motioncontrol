@@ -119,7 +119,7 @@ class AxisPositionControllerReal:
         If the axis cannot be found an appropriate error is raised.
         """
 
-        axis_name = self._get_axis_name(invocation_metadata())
+        axis_name = self._get_axis_name(invocation_metadata)
         try:
             return self.axes[axis_name]
         except KeyError:
@@ -305,13 +305,15 @@ class AxisPositionControllerReal:
         """
 
         axis = self._get_axis(context.invocation_metadata())
+        axis_name = axis.device.get_device_name()
         axis.device.find_home()
 
         is_moving = True
         while is_moving:
             time.sleep(0.5)
-            logging.info("Position: %s", axis.device.get_actual_position())
+            logging.info("Position: %s (axis: %s)", axis.device.get_actual_position(), axis_name)
             is_moving = not axis.device.is_homing_position_attained()
+        logging.info(f"MoveToHomePosition for {axis_name} done")
 
         return AxisPositionController_pb2.MoveToHomePosition_Responses()
 
