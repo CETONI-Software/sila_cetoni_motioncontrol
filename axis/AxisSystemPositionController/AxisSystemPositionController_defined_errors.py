@@ -49,7 +49,7 @@ class MovementBlockedError(SiLAExecutionError):
         msg = f"The movement of the axis system is blocked and rotation is not allowed. "\
                "Rotation is only allowed if the upper limit sensor is on - that means if " \
                "the lift axis is in its topmost position." \
-               + f'\n{extra_message}' if extra_message else ""
+               + (f'\n{extra_message}' if extra_message else "")
         super().__init__(error_identifier="de.cetoni/motioncontrol.axis/AxisSystemPositionController/v1/DefinedError/MovementBlocked",
                          msg=msg)
 
