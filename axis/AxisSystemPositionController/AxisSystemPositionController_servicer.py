@@ -37,7 +37,7 @@ from typing import Union
 
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
-from impl.common.qmix_errors import QmixSDKSiLAError, SiLAError, DeviceError
+from impl.common.errors import QmixSDKSiLAError, SiLAError, DeviceError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemPositionController_pb2 as AxisSystemPositionController_pb2

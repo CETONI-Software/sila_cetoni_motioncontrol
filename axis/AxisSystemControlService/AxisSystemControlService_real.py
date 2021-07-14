@@ -41,7 +41,7 @@ from configparser import ConfigParser, NoSectionError, NoOptionError
 # import SiLA2 library
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 # import SiLA errors
-from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAExecutionError
+from impl.common.errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAExecutionError
 
 # import gRPC modules for this feature
 from .gRPC import AxisSystemControlService_pb2 as AxisSystemControlService_pb2

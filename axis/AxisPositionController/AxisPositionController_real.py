@@ -42,7 +42,7 @@ from collections import namedtuple
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 
 # import SiLA errors
-from impl.common.qmix_errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAValidationError
+from impl.common.errors import SiLAFrameworkError, SiLAFrameworkErrorType, SiLAValidationError
 
 # import gRPC modules for this feature
 from .gRPC import AxisPositionController_pb2 as AxisPositionController_pb2

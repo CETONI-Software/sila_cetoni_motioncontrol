@@ -40,7 +40,7 @@ from typing import Any, Dict
 import sila2lib.framework.SiLAFramework_pb2 as silaFW_pb2
 
 # import SiLA errors
-from impl.common.qmix_errors import DeviceError, SiLAFrameworkError, SiLAFrameworkErrorType, \
+from impl.common.errors import DeviceError, SiLAFrameworkError, SiLAFrameworkErrorType, \
     SiLAValidationError, SiLAExecutionError
 
 # import gRPC modules for this feature
