@@ -123,7 +123,7 @@ class AxisPositionControllerClient:
             )
             metadata = ((METADATA_AXIS_IDENTIFIER, self._serialize_axis_id(axis_id)),)
 
-            response = self.AxisPositionController_stub.MoveToPosition(parameter, metadata)
+            response = self.AxisPositionController_stub.MoveToPosition(parameter, metadata=metadata)
 
             logging.debug('MoveToPosition response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
@@ -162,7 +162,7 @@ class AxisPositionControllerClient:
         )
         try:
             metadata = ((METADATA_AXIS_IDENTIFIER, self._serialize_axis_id(axis_id)),)
-            response = self.AxisPositionController_stub.MoveToPosition_Info(uuid, metadata)
+            response = self.AxisPositionController_stub.MoveToPosition_Info(uuid, metadata=metadata)
             logging.debug('MoveToPosition status information: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
@@ -197,7 +197,7 @@ class AxisPositionControllerClient:
 
         try:
             metadata = ((METADATA_AXIS_IDENTIFIER, self._serialize_axis_id(axis_id)),)
-            response = self.AxisPositionController_stub.MoveToPosition_Result(uuid, metadata)
+            response = self.AxisPositionController_stub.MoveToPosition_Result(uuid, metadata=metadata)
             logging.debug('MoveToPosition result response: {response}'.format(response=response))
         except grpc.RpcError as grpc_err:
             self.grpc_error_handling(grpc_err)
