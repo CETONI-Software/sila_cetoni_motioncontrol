@@ -99,73 +99,73 @@ if __name__ == '__main__':
     # ------------- command calls -------------------
 
     # ----- de/cetoni/motioncontrol/axis/AxisSystemControlService
-    # results = sila_client.axisSystemControlService_client.EnableAxisSystem()
+    # results = sila_client.axis_system_control_service.EnableAxisSystem()
     # print("EnableAxisSystem res: ", results)
 
-    # results = sila_client.axisSystemControlService_client.DisableAxisSystem()
+    # results = sila_client.axis_system_control_service.DisableAxisSystem()
     # print("DisableAxisSystem res: ", results)
 
-    # results = sila_client.axisSystemControlService_client.ClearFaultState()
+    # results = sila_client.axis_system_control_service.ClearFaultState()
     # print("ClearFaultState res: ", results)
 
     # ----- de/cetoni/motioncontrol/axis/AxisSystemPositionController
-    # results = sila_client.axisSystemPositionController_client.MoveToPosition(Position: None = None,Velocity: int = 1)
+    # results = sila_client.axis_system_position_controller.MoveToPosition(Position: None = None,Velocity: int = 1)
     # print("AxisSystemPositionController MoveToPosition res: ", results)
 
-    # results = sila_client.axisSystemPositionController_client.MoveToHomePosition()
+    # results = sila_client.axis_system_position_controller.MoveToHomePosition()
     # print("MoveToHomePosition res: ", results)
 
-    # results = sila_client.axisSystemPositionController_client.StopMoving()
+    # results = sila_client.axis_system_position_controller.StopMoving()
     # print("StopMoving res: ", results)
 
     # ----- de/cetoni/motioncontrol/axis/AxisPositionController
-    # results = sila_client.axisPositionController_client.MoveToPosition(Position: float = 1.0,Velocity: float = 1.0)
+    # results = sila_client.axis_position_controller.MoveToPosition(Position: float = 1.0,Velocity: float = 1.0)
     # print("AxisPositionController MoveToPosition res: ", results)
 
-    # results = sila_client.axisPositionController_client.MoveToHomePosition()
+    # results = sila_client.axis_position_controller.MoveToHomePosition()
     # print("MoveToHomePosition res: ", results)
 
-    # results = sila_client.axisPositionController_client.StopMoving()
+    # results = sila_client.axis_position_controller.StopMoving()
     # print("StopMoving res: ", results)
 
     # ----- de/cetoni/core/ShutdownController
-    # results = sila_client.shutdownController_client.Shutdown()
+    # results = sila_client.shutdown_controller.Shutdown()
     # print("Shutdown res: ", results)
 
 
     # ------------- property calls -------------------
 
     # ----- de/cetoni/motioncontrol/axis/AxisSystemControlService
-    # results = sila_client.axisSystemControlService_client.Get_AvailableAxes()
+    # results = sila_client.axis_system_control_service.Get_AvailableAxes()
     # print("AvailableAxes res: ", results)
 
-    # results = sila_client.axisSystemControlService_client.Subscribe_AxisSystemState()
+    # results = sila_client.axis_system_control_service.Subscribe_AxisSystemState()
     # print("AxisSystemState res: ", results)
 
-    # results = sila_client.axisSystemControlService_client.Subscribe_AxesInFaultState()
+    # results = sila_client.axis_system_control_service.Subscribe_AxesInFaultState()
     # print("AxesInFaultState res: ", results)
 
     # ----- de/cetoni/motioncontrol/axis/AxisSystemPositionController
-    # results = sila_client.axisSystemPositionController_client.Subscribe_Position()
+    # results = sila_client.axis_system_position_controller.Subscribe_Position()
     # print("AxisSystemPositionController Position res: ", results)
 
     # ----- de/cetoni/motioncontrol/axis/AxisPositionController
-    # results = sila_client.axisPositionController_client.Subscribe_Position()
+    # results = sila_client.axis_position_controller.Subscribe_Position()
     # print("AxisPositionController Position res: ", results)
 
-    # results = sila_client.axisPositionController_client.Get_PositionUnit()
+    # results = sila_client.axis_position_controller.Get_PositionUnit()
     # print("PositionUnit res: ", results)
 
-    # results = sila_client.axisPositionController_client.Get_MinimumPosition()
+    # results = sila_client.axis_position_controller.Get_MinimumPosition()
     # print("MinimumPosition res: ", results)
 
-    # results = sila_client.axisPositionController_client.Get_MaximumPosition()
+    # results = sila_client.axis_position_controller.Get_MaximumPosition()
     # print("MaximumPosition res: ", results)
 
-    # results = sila_client.axisPositionController_client.Get_MinimumVelocity()
+    # results = sila_client.axis_position_controller.Get_MinimumVelocity()
     # print("MinimumVelocity res: ", results)
 
-    # results = sila_client.axisPositionController_client.Get_MaximumVelocity()
+    # results = sila_client.axis_position_controller.Get_MaximumVelocity()
     # print("MaximumVelocity res: ", results)
 
     # ----- de/cetoni/core/ShutdownController

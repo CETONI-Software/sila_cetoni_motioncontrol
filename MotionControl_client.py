@@ -83,10 +83,10 @@ class MotionControlClient(QmixIOClient):
               compare the default dictionary that is stored in the directory of the corresponding feature.
     """
 
-    axisSystemControlService_client =  None
-    axisSystemPositionController_client =  None
-    axisPositionController_client =  None
-    shutdownController_client =  None
+    axis_system_control_service =  None
+    axis_system_position_controller =  None
+    axis_position_controller =  None
+    shutdown_controller =  None
 
     # The following variables will be filled when run() is executed
     #: Storage for the connected servers version
@@ -122,10 +122,10 @@ class MotionControlClient(QmixIOClient):
             f"Starting SiLA2 service client for service MotionControl with service name: {name}"
         )
 
-        self.axisSystemControlService_client = AxisSystemControlServiceClient(self.channel)
-        self.axisSystemPositionController_client = AxisSystemPositionControllerClient(self.channel)
-        self.axisPositionController_client = AxisPositionControllerClient(self.channel)
-        self.shutdownController_client = ShutdownControllerClient(self.channel)
+        self.axis_system_control_service = AxisSystemControlServiceClient(self.channel)
+        self.axis_system_position_controller = AxisSystemPositionControllerClient(self.channel)
+        self.axis_position_controller = AxisPositionControllerClient(self.channel)
+        self.shutdown_controller = ShutdownControllerClient(self.channel)
 
 
         # initialise class variables for server information storage
