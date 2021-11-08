@@ -30,6 +30,7 @@ __version__ = "0.1.0"
 
 # import general packages
 import logging
+import math
 import time         # used for observables
 import uuid         # used for observables
 import grpc         # used for type hinting only
@@ -332,13 +333,16 @@ class AxisPositionControllerReal:
 
         axis = self._get_axis(context.invocation_metadata())
 
+        new_position = axis.get_actual_position()
+        position = new_position + 1 # force sending the first value
         while True:
-            position = axis.get_actual_position()
-
-            yield AxisPositionController_pb2.Subscribe_Position_Responses(
-                Position=silaFW_pb2.Real(value=position)
-            )
-            time.sleep(0.5) # give client some time to catch up
+            new_position = axis.get_actual_position()
+            if not math.isclose(new_position, position):
+                position = new_position
+                yield AxisPositionController_pb2.Subscribe_Position_Responses(
+                    Position=silaFW_pb2.Real(value=position)
+                )
+            time.sleep(0.1) # give client some time to catch up
 
 
     def Get_PositionUnit(self, request, context: grpc.ServicerContext) \

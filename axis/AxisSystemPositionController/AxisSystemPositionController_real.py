@@ -405,15 +405,19 @@ class AxisSystemPositionControllerReal:
             Position (Position): The current XY position of the axis system
         """
 
+        new_position = self.axis_system.get_actual_position_xy()
+        position = new_position.x + 1 # force sending the first value
         while True:
-            position = self.axis_system.get_actual_position_xy()
-
-            yield AxisSystemPositionController_pb2.Subscribe_Position_Responses(
-                Position=AxisSystemPositionController_pb2.DataType_Position(
-                    Position=AxisSystemPositionController_pb2.DataType_Position.Position_Struct(
-                        X=silaFW_pb2.Real(value=position.x),
-                        Y=silaFW_pb2.Real(value=position.y)
+            new_position = self.axis_system.get_actual_position_xy()
+            if not math.isclose(new_position.x, position.x) or \
+                not math.isclose(new_position.y, position.y):
+                position = new_position
+                yield AxisSystemPositionController_pb2.Subscribe_Position_Responses(
+                    Position=AxisSystemPositionController_pb2.DataType_Position(
+                        Position=AxisSystemPositionController_pb2.DataType_Position.Position_Struct(
+                            X=silaFW_pb2.Real(value=position.x),
+                            Y=silaFW_pb2.Real(value=position.y)
+                        )
                     )
                 )
-            )
-            time.sleep(0.5) # give client some time to catch up
+            time.sleep(0.1) # give client some time to catch up

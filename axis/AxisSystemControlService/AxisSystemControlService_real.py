@@ -94,6 +94,23 @@ class AxisSystemControlServiceReal:
                 logging.error("Cannot read config file option in %s", err)
                 logging.error("No drive position counter found! Homing move needed!")
 
+    def _is_all_axes_enabled(self) -> bool:
+        """
+        Returns whether all axes of this axis system are enabled or not
+        """
+        enabled = True
+        for name, axis in self.axes.items():
+            logging.debug(f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
+            enabled &= axis.is_enabled()
+        return enabled
+
+    def _get_axes_in_fault_state(self) -> list[silaFW_pb2.String]:
+        """
+        Returns a list of the names of all axes that are currently in a fault state
+        """
+        return [silaFW_pb2.String(value=axis_name)
+                for axis_name, axis in self.axes.items() if axis.is_in_fault_state()]
+
     def EnableAxisSystem(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.EnableAxisSystem_Responses:
         """
@@ -185,18 +202,18 @@ class AxisSystemControlServiceReal:
             AxisSystemState (Axis System State): The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis system can move.
         """
 
+        new_is_enabled = self._is_all_axes_enabled()
+        is_enabled = not new_is_enabled # force sending the first value
         while True:
-            enabled = True
-            for name, axis in self.axes.items():
-                logging.debug(f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
-                enabled &= axis.is_enabled()
+            new_is_enabled = self._is_all_axes_enabled()
+            if new_is_enabled != is_enabled:
+                is_enabled = new_is_enabled
+                logging.debug(f"Axis system {'is' if is_enabled else 'is not'} enabled")
+                yield AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses(
+                    AxisSystemState=silaFW_pb2.String(value='Enabled' if is_enabled else 'Disabled')
+                )
 
-            logging.debug(f"Axis system {'is' if enabled else 'is not'} enabled")
-            yield AxisSystemControlService_pb2.Subscribe_AxisSystemState_Responses(
-                AxisSystemState=silaFW_pb2.String(value='Enabled' if enabled else 'Disabled')
-            )
-
-            time.sleep(0.5) # give client some time to catch up
+            time.sleep(0.1) # give client some time to catch up
 
     def Subscribe_AxesInFaultState(self, request, context: grpc.ServicerContext) \
             -> AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses:
@@ -211,11 +228,14 @@ class AxisSystemControlServiceReal:
             AxesInFaultState (Axes In Fault State): Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling ClearFaultState.
         """
 
+        new_axes_in_fault_state = self._get_axes_in_fault_state()
+        axes_in_fault_state = new_axes_in_fault_state + 1 # force sending the first value
         while True:
-            yield AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses(
-                AxesInFaultState=[
-                    silaFW_pb2.String(value=axis_name) for axis_name, axis in self.axes.items() if axis.is_in_fault_state()
-                ]
-            )
+            new_axes_in_fault_state = self._get_axes_in_fault_state()
+            if new_axes_in_fault_state != axes_in_fault_state:
+                axes_in_fault_state = new_axes_in_fault_state
+                yield AxisSystemControlService_pb2.Subscribe_AxesInFaultState_Responses(
+                    AxesInFaultState=axes_in_fault_state
+                )
 
-            time.sleep(0.5) # give client some time to catch up
+            time.sleep(0.1) # give client some time to catch up
