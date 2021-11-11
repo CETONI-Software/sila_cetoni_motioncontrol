@@ -54,8 +54,9 @@ from .AxisPositionController_default_arguments import default_dict
 
 from qmixsdk.qmixmotion import Axis, AxisSystem, PositionUnit
 
-from . import METADATA_AXIS_IDENTIFIER
+from application.system import ApplicationSystem
 
+from . import METADATA_AXIS_IDENTIFIER
 
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisPositionControllerReal:
@@ -71,6 +72,7 @@ class AxisPositionControllerReal:
         :param axis_system: The axis system that this feature shall operate on
         """
 
+        self.system =  ApplicationSystem()
         self.axis_system = axis_system
 
         self.axes: Dict[str, Axis] = {
@@ -335,7 +337,7 @@ class AxisPositionControllerReal:
 
         new_position = axis.get_actual_position()
         position = new_position + 1 # force sending the first value
-        while True:
+        while not self.system.state.shutting_down():
             new_position = axis.get_actual_position()
             if not math.isclose(new_position, position):
                 position = new_position

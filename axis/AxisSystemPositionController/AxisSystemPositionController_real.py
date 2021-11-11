@@ -64,6 +64,8 @@ import shapely.ops as ops
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
 
+from application.system import ApplicationSystem
+
 # noinspection PyPep8Naming,PyUnusedLocal
 class AxisSystemPositionControllerReal:
     """
@@ -79,6 +81,7 @@ class AxisSystemPositionControllerReal:
         :param device_properties: Additional device properties that cannot be retrieved using QmixSDK functions
         """
 
+        self.system =  ApplicationSystem()
         self.axis_system = axis_system
         self.movement_uuid = ''
 
@@ -407,7 +410,7 @@ class AxisSystemPositionControllerReal:
 
         new_position = self.axis_system.get_actual_position_xy()
         position = new_position.x + 1 # force sending the first value
-        while True:
+        while not self.system.state.shutting_down():
             new_position = self.axis_system.get_actual_position_xy()
             if not math.isclose(new_position.x, position.x) or \
                 not math.isclose(new_position.y, position.y):
