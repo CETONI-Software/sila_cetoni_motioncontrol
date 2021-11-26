@@ -337,7 +337,7 @@ class AxisPositionControllerReal:
 
         new_position = axis.get_actual_position()
         position = new_position + 1 # force sending the first value
-        while not self.system.state.shutting_down():
+        while context.is_active():
             new_position = axis.get_actual_position()
             if not math.isclose(new_position, position):
                 position = new_position

@@ -410,7 +410,7 @@ class AxisSystemPositionControllerReal:
 
         new_position = self.axis_system.get_actual_position_xy()
         position = new_position.x + 1 # force sending the first value
-        while not self.system.state.shutting_down():
+        while context.is_active():
             new_position = self.axis_system.get_actual_position_xy()
             if not math.isclose(new_position.x, position.x) or \
                 not math.isclose(new_position.y, position.y):

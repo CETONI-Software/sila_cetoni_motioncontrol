@@ -204,7 +204,7 @@ class AxisSystemControlServiceReal:
 
         new_is_enabled = self._is_all_axes_enabled()
         is_enabled = not new_is_enabled # force sending the first value
-        while not self.system.state.shutting_down():
+        while context.is_active():
             new_is_enabled = self._is_all_axes_enabled()
             if new_is_enabled != is_enabled:
                 is_enabled = new_is_enabled
@@ -230,7 +230,7 @@ class AxisSystemControlServiceReal:
 
         new_axes_in_fault_state = self._get_axes_in_fault_state()
         axes_in_fault_state = new_axes_in_fault_state + 1 # force sending the first value
-        while not self.system.state.shutting_down():
+        while context.is_active():
             new_axes_in_fault_state = self._get_axes_in_fault_state()
             if new_axes_in_fault_state != axes_in_fault_state:
                 axes_in_fault_state = new_axes_in_fault_state
