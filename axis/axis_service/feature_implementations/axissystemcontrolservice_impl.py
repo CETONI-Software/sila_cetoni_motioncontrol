@@ -52,6 +52,10 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
                     self.update_AxesInFaultState(axes_in_fault)
                 time.sleep(0.1)
 
+        # initial value
+        self.update_AxisSystemState("Enabled" if self._is_all_axes_enabled() else "Disabled")
+        self.update_AxesInFaultState(self._get_axes_in_fault_state())
+
         executor.submit(update_axis_system_state, self.__stop_event)
         executor.submit(update_axes_in_fault_state, self.__stop_event)
 
@@ -61,7 +65,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         """
         enabled = True
         for name, axis in self.__axes.items():
-            logging.debug(f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
+            # logging.debug(f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
             enabled &= axis.is_enabled()
         return enabled
 

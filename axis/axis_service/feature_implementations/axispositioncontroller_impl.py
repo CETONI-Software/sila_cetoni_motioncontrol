@@ -53,7 +53,10 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         for i in range(len(self.__axes)):
             self.__value_queues += [Queue()]
             axis_id = list(self.__axes.keys())[i]
+
+            # initial value
             self.update_Position(self.__axes[axis_id].get_actual_position(), queue=self.__value_queues[i])
+
             executor.submit(self.__make_position_updater(i, axis_id), self.__stop_event)
 
     def __make_position_updater(self, i: int, axis_id: str):
