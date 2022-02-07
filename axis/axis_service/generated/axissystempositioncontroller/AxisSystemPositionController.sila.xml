@@ -1,0 +1,132 @@
+<Feature xmlns="http://www.sila-standard.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Category="motioncontrol.axis" FeatureVersion="1.0" Originator="de.cetoni" SiLA2Version="1.0" xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+  <Identifier>AxisSystemPositionController</Identifier>
+  <DisplayName>Axis System Position Controller</DisplayName>
+  <Description>Allows to control the position of an axis system</Description>
+  <!-- Commands -->
+  <Command>
+    <Identifier>MoveToPosition</Identifier>
+    <DisplayName>Move To Position</DisplayName>
+    <Description>Move the axis system to the given position with a certain velocity</Description>
+    <Observable>Yes</Observable>
+    <Parameter>
+      <Identifier>Position</Identifier>
+      <DisplayName>Position</DisplayName>
+      <Description>The position to move to</Description>
+      <DataType>
+        <DataTypeIdentifier>Position</DataTypeIdentifier>
+      </DataType>
+    </Parameter>
+    <Parameter>
+      <Identifier>Velocity</Identifier>
+      <DisplayName>Velocity</DisplayName>
+      <Description>An integer value between 0 (exclusive) and 100 (inclusive) defining the relative speed at which all axes of the axis system should move. The velocity value is multiplied with the maximum velocity value of each axis. So a value of 100 means, all axes travel with their maximum velocity. A value of 50 means, all axes travel with the half of the maximum velocity.</Description>
+      <DataType>
+        <Constrained>
+          <DataType>
+            <Basic>Integer</Basic>
+          </DataType>
+          <Constraints>
+            <MinimalExclusive>0</MinimalExclusive>
+            <MaximalInclusive>100</MaximalInclusive>
+            <Unit>
+              <Label>%</Label>
+              <Factor>1</Factor>
+              <Offset>0</Offset>
+              <UnitComponent>
+                <SIUnit>Dimensionless</SIUnit>
+                <Exponent>1</Exponent>
+              </UnitComponent>
+            </Unit>
+          </Constraints>
+        </Constrained>
+      </DataType>
+    </Parameter>
+    <DefinedExecutionErrors>
+      <Identifier>MovementBlocked</Identifier>
+    </DefinedExecutionErrors>
+  </Command>
+  <Command>
+    <Identifier>MoveToHomePosition</Identifier>
+    <DisplayName>Move To Home Position</DisplayName>
+    <Description>Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axes into a home state.</Description>
+    <Observable>No</Observable>
+  </Command>
+  <Command>
+    <Identifier>StopMoving</Identifier>
+    <DisplayName>Stop Moving</DisplayName>
+    <Description>Immediately stops all movement of the axis system</Description>
+    <Observable>No</Observable>
+  </Command>
+  <!-- Properties -->
+  <Property>
+    <Identifier>Position</Identifier>
+    <DisplayName>Position</DisplayName>
+    <Description>The current XY position of the axis system</Description>
+    <Observable>Yes</Observable>
+    <DataType>
+      <DataTypeIdentifier>Position</DataTypeIdentifier>
+    </DataType>
+  </Property>
+  <!-- Data Types -->
+  <DataTypeDefinition>
+    <Identifier>Position</Identifier>
+    <DisplayName>Position</DisplayName>
+    <Description>An (X, Y) position vector</Description>
+    <DataType>
+      <Structure>
+        <Element>
+          <Identifier>X</Identifier>
+          <DisplayName>X</DisplayName>
+          <Description>The X component of the position</Description>
+          <DataType>
+            <Constrained>
+              <DataType>
+                <Basic>Real</Basic>
+              </DataType>
+              <Constraints>
+                <Unit>
+                  <Label>mm</Label>
+                  <Factor>0.001</Factor>
+                  <Offset>0</Offset>
+                  <UnitComponent>
+                    <SIUnit>Meter</SIUnit>
+                    <Exponent>1</Exponent>
+                  </UnitComponent>
+                </Unit>
+              </Constraints>
+            </Constrained>
+          </DataType>
+        </Element>
+        <Element>
+          <Identifier>Y</Identifier>
+          <DisplayName>Y</DisplayName>
+          <Description>The Y component of the position</Description>
+          <DataType>
+            <Constrained>
+              <DataType>
+                <Basic>Real</Basic>
+              </DataType>
+              <Constraints>
+                <Unit>
+                  <Label>mm</Label>
+                  <Factor>0.001</Factor>
+                  <Offset>0</Offset>
+                  <UnitComponent>
+                    <SIUnit>Meter</SIUnit>
+                    <Exponent>1</Exponent>
+                  </UnitComponent>
+                </Unit>
+              </Constraints>
+            </Constrained>
+          </DataType>
+        </Element>
+      </Structure>
+    </DataType>
+  </DataTypeDefinition>
+  <!-- Errors -->
+  <DefinedExecutionError>
+    <Identifier>MovementBlocked</Identifier>
+    <DisplayName>Movement Blocked</DisplayName>
+    <Description>The movement of the axis system is blocked and rotation is not allowed. Rotation is only allowed if the upper limit sensor is on - that means if the lift axis is in its topmost position.</Description>
+  </DefinedExecutionError>
+</Feature>
