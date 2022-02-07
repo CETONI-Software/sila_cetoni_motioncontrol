@@ -35,15 +35,21 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         self.__stop_event = Event()
 
         def update_axis_system_state(stop_event: Event):
+            new_is_enabled = is_enabled = self._is_all_axes_enabled()
             while not stop_event.is_set():
-                self.update_AxisSystemState("Enabled" if self._is_all_axes_enabled() else "Disabled")
-                # TODO smart update
+                new_is_enabled = self._is_all_axes_enabled()
+                if new_is_enabled != is_enabled:
+                    is_enabled = new_is_enabled
+                    self.update_AxisSystemState("Enabled" if is_enabled else "Disabled")
                 time.sleep(0.1)
 
         def update_axes_in_fault_state(stop_event: Event):
+            new_axes_in_fault = axes_in_fault = self._get_axes_in_fault_state()
             while not stop_event.is_set():
-                self.update_AxesInFaultState(self._get_axes_in_fault_state())
-                # TODO smart update
+                new_axes_in_fault = self._get_axes_in_fault_state()
+                if new_axes_in_fault != axes_in_fault:
+                    axes_in_fault = new_axes_in_fault
+                    self.update_AxesInFaultState(axes_in_fault)
                 time.sleep(0.1)
 
         executor.submit(update_axis_system_state, self.__stop_event)
