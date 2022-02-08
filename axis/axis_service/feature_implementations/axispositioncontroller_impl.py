@@ -1,28 +1,27 @@
 from __future__ import annotations
-import math
-from queue import Queue
 
-import time
 import logging
-from threading import Event
+import math
+import time
 from concurrent.futures import Executor
+from queue import Queue
+from threading import Event
 from typing import Any, Dict, List, Optional, Union
 
+from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import Command, Feature, FullyQualifiedIdentifier, Property
 from sila2.framework.command.execution_info import CommandExecutionStatus
 from sila2.framework.errors.validation_error import ValidationError
 from sila2.server import ObservableCommandInstance
 
-from qmixsdk.qmixmotion import Axis, AxisSystem
-
 from ..generated.axispositioncontroller import (
     AxisPositionControllerBase,
     AxisPositionControllerFeature,
+    InvalidAxisIdentifier,
     MoveToHomePosition_Responses,
     MoveToPosition_Responses,
     StopMoving_Responses,
     Velocity,
-    InvalidAxisIdentifier,
 )
 
 

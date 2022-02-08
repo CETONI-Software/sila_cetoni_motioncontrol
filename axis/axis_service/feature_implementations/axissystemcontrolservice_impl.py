@@ -1,17 +1,15 @@
 from __future__ import annotations
-import logging
 
+import logging
 import time
-from threading import Event
 from concurrent.futures import Executor
+from threading import Event
 from typing import Any, Dict, List
 
+from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
 
-from qmixsdk.qmixmotion import Axis, AxisSystem
-
 from .....application.config import Config
-
 from ..generated.axissystemcontrolservice import (
     AxisSystemControlServiceBase,
     ClearFaultState_Responses,
