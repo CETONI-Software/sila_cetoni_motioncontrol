@@ -33,8 +33,6 @@ from ..generated.axissystempositioncontroller import (
 # import matplotlib.pyplot as plt
 
 
-
-
 class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
