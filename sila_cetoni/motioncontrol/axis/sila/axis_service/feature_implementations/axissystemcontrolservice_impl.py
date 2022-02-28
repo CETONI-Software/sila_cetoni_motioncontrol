@@ -9,7 +9,8 @@ from typing import Any, Dict, List
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
 
-from .....application.config import Config
+from sila_cetoni.application.config import Config
+
 from ..generated.axissystemcontrolservice import (
     AxisSystemControlServiceBase,
     ClearFaultState_Responses,
