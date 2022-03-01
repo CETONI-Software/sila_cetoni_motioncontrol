@@ -173,7 +173,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         logging.info("Finished moving!")
 
     def get_calls_affected_by_AxisIdentifier(self) -> List[Union[Feature, Command, Property, FullyQualifiedIdentifier]]:
-        return AxisPositionControllerFeature
+        return [AxisPositionControllerFeature]
 
     def stop(self) -> None:
         self.__stop_event.set()
