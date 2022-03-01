@@ -29,7 +29,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
     __axis_id_identifier: FullyQualifiedIdentifier
-    __value_queues: List[Queue[float]]  # same number of items and order as `__axes`
+    __value_queues: Dict[str, Queue[float]]  # same keys and number of items and order as `__axes`
     __stop_event: Event
 
     def __init__(self, axis_system: AxisSystem, executor: Executor):
@@ -48,24 +48,23 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
 
         self.__stop_event = Event()
 
-        self.__value_queues = []
-        for i in range(len(self.__axes)):
-            self.__value_queues += [Queue()]
-            axis_id = list(self.__axes.keys())[i]
+        self.__value_queues = {}
+        for axis_id in self.__axes.keys():
+            self.__value_queues[axis_id] = Queue()
 
             # initial value
-            self.update_Position(self.__axes[axis_id].get_actual_position(), queue=self.__value_queues[i])
+            self.update_Position(self.__axes[axis_id].get_actual_position(), queue=self.__value_queues[axis_id])
 
-            executor.submit(self.__make_position_updater(i, axis_id), self.__stop_event)
+            executor.submit(self.__make_position_updater(axis_id), self.__stop_event)
 
-    def __make_position_updater(self, i: int, axis_id: str):
+    def __make_position_updater(self, axis_id: str):
         def update_position(stop_event: Event):
             new_value = value = self.__axes[axis_id].get_actual_position()
             while not stop_event.is_set():
                 new_value = self.__axes[axis_id].get_actual_position()
                 if not math.isclose(new_value, value):
                     value = new_value
-                    self.update_Position(value, queue=self.__value_queues[i])
+                    self.update_Position(value, queue=self.__value_queues[axis_id])
                 time.sleep(0.1)
 
         return update_position
@@ -74,7 +73,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         """
         Retrieves the axis that is requested by the `metadata`
         """
-        axis_identifier: int = metadata.pop(self.__axis_id_identifier)
+        axis_identifier: str = metadata.pop(self.__axis_id_identifier)
         logging.debug(f"axis id: {axis_identifier}")
         try:
             return self.__axes[axis_identifier]
@@ -100,7 +99,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         return self._get_axis(metadata).get_velocity_max()
 
     def Position_on_subscription(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> Optional[Queue[float]]:
-        axis_identifier: int = metadata.pop(self.__axis_id_identifier)
+        axis_identifier: str = metadata.pop(self.__axis_id_identifier)
         try:
             return self.__value_queues[axis_identifier]
         except IndexError:
@@ -123,7 +122,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
     def StopMoving(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> StopMoving_Responses:
         self._get_axis(metadata).stop_move()
 
-    def _validate(axis: Axis, position: float, velocity: Velocity):
+    def _validate(self, axis: Axis, position: float, velocity: Velocity):
         min_position = axis.get_position_min()
         max_position = axis.get_position_max()
         if position < min_position or position > max_position:
