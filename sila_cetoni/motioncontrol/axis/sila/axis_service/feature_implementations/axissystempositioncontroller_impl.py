@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import math
 import time
+from collections import namedtuple
 from concurrent.futures import Executor
 from threading import Event
 from typing import Any, Dict
@@ -26,6 +27,8 @@ from ..generated.axissystempositioncontroller import (
     Position,
     StopMoving_Responses,
 )
+
+Position = namedtuple("Position", ["X", "Y"])
 
 # only for debugging the positioning shape
 # from matplotlib import use
@@ -185,15 +188,15 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         instance: ObservableCommandInstance,
     ) -> MoveToPosition_Responses:
         logging.debug(f"Position: {Position}, Vel: {Velocity}")
-        self._validate(Position)  # TODO Position type unknown
-        self.StopMoving()
+        self._validate(geom.Point(Position.X, Position.Y))
+        self.__axis_system.stop_move()
 
         # send first info immediately
         instance.status = CommandExecutionStatus.running
         instance.progress = 0
 
         try:
-            self.__axis_system.move_to_postion_xy(Position.x, Position.y, Velocity / 100)
+            self.__axis_system.move_to_postion_xy(Position.X, Position.Y, Velocity / 100)
         except DeviceError as err:
             if err.errorcode == -1:  # Operation not permitted
                 raise MovementBlocked()
