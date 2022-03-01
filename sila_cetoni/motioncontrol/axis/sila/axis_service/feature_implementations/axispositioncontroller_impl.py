@@ -24,6 +24,8 @@ from ..generated.axispositioncontroller import (
     Velocity,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class AxisPositionControllerImpl(AxisPositionControllerBase):
     __axis_system: AxisSystem
@@ -44,7 +46,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         for name, axis in self.__axes.items():
             unit = axis.get_position_unit()
             unit_string = (unit.prefix.name if unit.prefix.name != "unit" else "") + unit.unitid.name
-            logging.debug(f"{name}, {unit_string}")
+            logger.debug(f"{name}, {unit_string}")
 
         self.__stop_event = Event()
 
@@ -74,7 +76,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         Retrieves the axis that is requested by the `metadata`
         """
         axis_identifier: str = metadata.pop(self.__axis_id_identifier)
-        logging.debug(f"axis id: {axis_identifier}")
+        logger.debug(f"axis id: {axis_identifier}")
         try:
             return self.__axes[axis_identifier]
         except KeyError:
@@ -115,9 +117,9 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         is_moving = True
         while is_moving:
             time.sleep(0.5)
-            logging.info("Position: %s (axis: %s)", axis.get_actual_position(), axis_name)
+            logger.info("Position: %s (axis: %s)", axis.get_actual_position(), axis_name)
             is_moving = not axis.is_homing_position_attained()
-        logging.info(f"MoveToHomePosition for {axis_name} done")
+        logger.info(f"MoveToHomePosition for {axis_name} done")
 
     def StopMoving(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> StopMoving_Responses:
         self._get_axis(metadata).stop_move()
@@ -155,21 +157,21 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         instance.progress = 0
 
         axis.move_to_position(Position, Velocity)
-        logging.info(f"Started moving to {Position} with velocity of {Velocity}")
+        logger.info(f"Started moving to {Position} with velocity of {Velocity}")
 
         is_moving = True
         while is_moving:
             time.sleep(0.5)
-            logging.info("Position: %s", axis.get_actual_position())
+            logger.info("Position: %s", axis.get_actual_position())
             is_moving = not axis.is_target_position_reached()
 
         if not is_moving:
             instance.status = CommandExecutionStatus.finishedSuccessfully
         else:
             instance.status = CommandExecutionStatus.finishedWithError
-            logging.error("An unexpected error occurred: %s", axis.read_last_error())
+            logger.error("An unexpected error occurred: %s", axis.read_last_error())
 
-        logging.info("Finished moving!")
+        logger.info("Finished moving!")
 
     def get_calls_affected_by_AxisIdentifier(self) -> List[Union[Feature, Command, Property, FullyQualifiedIdentifier]]:
         return [AxisPositionControllerFeature]

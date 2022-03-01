@@ -35,6 +35,8 @@ Position = namedtuple("Position", ["X", "Y"])
 # use('Agg')
 # import matplotlib.pyplot as plt
 
+logger = logging.getLogger(__name__)
+
 
 class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
     __axis_system: AxisSystem
@@ -146,9 +148,9 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
 
             # connect the first and last points of both arcs to get a closed shape
             left_bound = geom.LineString([inner_arc.coords[0], outer_arc.coords[0]])
-            logging.debug(f"left_bound: {left_bound}")
+            logger.debug(f"left_bound: {left_bound}")
             right_bound = geom.LineString([inner_arc.coords[-1], outer_arc.coords[-1]])
-            logging.debug(f"right_bound: {right_bound}")
+            logger.debug(f"right_bound: {right_bound}")
 
             return geom.Polygon(ops.linemerge([left_bound, inner_arc, outer_arc, right_bound]))
 
@@ -172,7 +174,7 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
 
         if not point.within(self.positioning_shape):
             nearest_point, dummy = ops.nearest_points(self.positioning_shape, point)
-            logging.debug(f"nearest: {nearest_point}, other: {dummy}")
+            logger.debug(f"nearest: {nearest_point}, other: {dummy}")
             raise ValidationError(
                 AxisSystemPositionControllerFeature["MoveToPosition"].parameters.fields[0],
                 f"The given Position {point.x, point.y} is not within the valid positioning range for the axis "
@@ -187,7 +189,7 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         metadata: Dict[FullyQualifiedIdentifier, Any],
         instance: ObservableCommandInstance,
     ) -> MoveToPosition_Responses:
-        logging.debug(f"Position: {Position}, Vel: {Velocity}")
+        logger.debug(f"Position: {Position}, Vel: {Velocity}")
         self._validate(geom.Point(Position.X, Position.Y))
         self.__axis_system.stop_move()
 
@@ -202,21 +204,21 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
                 raise MovementBlocked()
             else:
                 raise err
-        logging.info(f"Started moving to {Position} with velocity of {Velocity}% of max velocity")
+        logger.info(f"Started moving to {Position} with velocity of {Velocity}% of max velocity")
 
         is_moving = True
         while is_moving:
             time.sleep(0.5)
-            logging.info("Position: %s", self.__axis_system.get_actual_position_xy())
+            logger.info("Position: %s", self.__axis_system.get_actual_position_xy())
             is_moving = not self.__axis_system.is_target_position_reached()
 
         if not is_moving:
             instance.status = CommandExecutionStatus.finishedSuccessfully
         else:
             instance.status = CommandExecutionStatus.finishedWithError
-            logging.error("An unexpected error occurred: %s", self.__axis_system.read_last_error())
+            logger.error("An unexpected error occurred: %s", self.__axis_system.read_last_error())
 
-        logging.info("Finished moving!")
+        logger.info("Finished moving!")
 
     def stop(self) -> None:
         self.__stop_event.set()

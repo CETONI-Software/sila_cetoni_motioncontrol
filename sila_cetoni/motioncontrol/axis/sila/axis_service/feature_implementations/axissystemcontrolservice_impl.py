@@ -18,6 +18,9 @@ from ..generated.axissystemcontrolservice import (
     EnableAxisSystem_Responses,
 )
 
+LOG_LEVEL_TRACE = 5
+logger = logging.getLogger(__name__)
+
 
 class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
     __axis_system: AxisSystem
@@ -70,10 +73,10 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         for axis_name in self.__axes.keys():
             pos_counter = self.__config.axis_position_counters.get(axis_name)
             if pos_counter is not None:
-                logging.debug(f"Restoring position counter: {pos_counter}")
+                logger.debug(f"Restoring position counter: {pos_counter}")
                 self.__axes[axis_name].restore_position_counter(pos_counter)
             else:
-                logging.warning(
+                logger.warning(
                     f"Could not read position counter for {axis_name} from config file. " "Homing move needed!"
                 )
 
@@ -83,7 +86,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         """
         enabled = True
         for name, axis in self.__axes.items():
-            logging.debug(f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
+            logger.log(LOG_LEVEL_TRACE, f"Axis {name} {'is' if axis.is_enabled() else 'is not'} enabled")
             enabled &= axis.is_enabled()
         return enabled
 
