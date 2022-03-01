@@ -3,7 +3,8 @@ from uuid import UUID
 
 from qmixsdk.qmixmotion import AxisSystem
 
-from ....io.io_service.server import Server as IOServer
+from sila_cetoni.io.sila.io_service.server import Server as IOServer
+
 from .feature_implementations.axispositioncontroller_impl import AxisPositionControllerImpl
 from .feature_implementations.axissystemcontrolservice_impl import AxisSystemControlServiceImpl
 from .feature_implementations.axissystempositioncontroller_impl import AxisSystemPositionControllerImpl
