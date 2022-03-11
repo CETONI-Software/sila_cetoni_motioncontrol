@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Feature SiLA2Version="1.0" FeatureVersion="1.0" Originator="de.cetoni" Category="motioncontrol.axis" xmlns="http://www.sila-standard.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+    <Identifier>AxisSystemControlService</Identifier>
+    <DisplayName>Axis System Control Service</DisplayName>
+    <Description>Provides functionality to observe and control the state of an axis system</Description>
+
+    <!-- Commands -->
+    <Command>
+        <Identifier>EnableAxisSystem</Identifier>
+        <DisplayName>Enable Axis System</DisplayName>
+        <Description>Set all axes of the axis system into enabled state</Description>
+        <Observable>No</Observable>
+    </Command>
+    <Command>
+        <Identifier>DisableAxisSystem</Identifier>
+        <DisplayName>Disable Axis System</DisplayName>
+        <Description>Set all axes of the axis system into disabled state</Description>
+        <Observable>No</Observable>
+    </Command>
+    <Command>
+        <Identifier>ClearFaultState</Identifier>
+        <DisplayName>Clear Fault State</DisplayName>
+        <Description>Clears the fault condition of all axes. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state.</Description>
+        <Observable>No</Observable>
+    </Command>
+
+    <!-- Properties -->
+    <Property>
+        <Identifier>AvailableAxes</Identifier>
+        <DisplayName>Available Axes</DisplayName>
+        <Description>The names of the individual axes of the axis system.</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <List>
+                <DataType>
+                    <Basic>String</Basic>
+                </DataType>
+            </List>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>AxisSystemState</Identifier>
+        <DisplayName>Axis System State</DisplayName>
+        <Description>The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis system can move.</Description>
+        <Observable>Yes</Observable>
+        <DataType>
+            <Constrained>
+                <DataType>
+                    <Basic>String</Basic>
+                </DataType>
+                <Constraints>
+                    <Set>
+                        <Value>Enabled</Value>
+                        <Value>Disabled</Value>
+                    </Set>
+                </Constraints>
+            </Constrained>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>AxesInFaultState</Identifier>
+        <DisplayName>Axes In Fault State</DisplayName>
+        <Description>Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling ClearFaultState.</Description>
+        <Observable>Yes</Observable>
+        <DataType>
+            <List>
+                <DataType>
+                    <Basic>String</Basic>
+                </DataType>
+            </List>
+        </DataType>
+    </Property>
+</Feature>

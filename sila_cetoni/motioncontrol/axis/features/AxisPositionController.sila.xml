@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Feature SiLA2Version="1.0" FeatureVersion="1.0" Originator="de.cetoni" Category="motioncontrol.axis" xmlns="http://www.sila-standard.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+    <Identifier>AxisPositionController</Identifier>
+    <DisplayName>Axis Position Controller</DisplayName>
+    <Description>Allows to control the position of one axis of an axis system</Description>
+
+    <!-- Metadata -->
+    <Metadata>
+        <Identifier>AxisIdentifier</Identifier>
+        <DisplayName>Axis Identifier</DisplayName>
+        <Description>The identifier of a single axis of an axis system. Use AvailableAxes from the AxisSystemControlService Feature to get all possible values.</Description>
+        <DataType>
+            <Basic>String</Basic>
+        </DataType>
+        <DefinedExecutionErrors>
+            <Identifier>InvalidAxisIdentifier</Identifier>
+        </DefinedExecutionErrors>
+    </Metadata>
+
+    <!-- Commands -->
+    <Command>
+        <Identifier>MoveToPosition</Identifier>
+        <DisplayName>Move To Position</DisplayName>
+        <Description>Move the axis to the given position with a certain velocity</Description>
+        <Observable>Yes</Observable>
+        <Parameter>
+            <Identifier>Position</Identifier>
+            <DisplayName>Position</DisplayName>
+            <Description>The position to move to. Has to be in the range between MinimumPosition and MaximumPosition. See PositionUnit for the unit that is used for a specific axis. E.g. for rotational axis systems one of the axes needs a position specified in radians.</Description>
+            <DataType>
+                <Basic>Real</Basic>
+            </DataType>
+        </Parameter>
+        <Parameter>
+            <Identifier>Velocity</Identifier>
+            <DisplayName>Velocity</DisplayName>
+            <Description>The velocity value for the movement. Has to be in the range between MinimumVelocity and MaximumVelocity.</Description>
+            <DataType>
+                <DataTypeIdentifier>Velocity</DataTypeIdentifier>
+            </DataType>
+        </Parameter>
+    </Command>
+
+    <Command>
+        <Identifier>MoveToHomePosition</Identifier>
+        <DisplayName>Move To Home Position</DisplayName>
+        <Description>Move the axis to its home position</Description>
+        <Observable>No</Observable>
+    </Command>
+
+    <Command>
+        <Identifier>StopMoving</Identifier>
+        <DisplayName>Stop Moving</DisplayName>
+        <Description>Immediately stops axis movement of a single axis</Description>
+        <Observable>No</Observable>
+    </Command>
+
+    <!-- Properties -->
+    <Property>
+        <Identifier>Position</Identifier>
+        <DisplayName>Position</DisplayName>
+        <Description>The current position of an axis</Description>
+        <Observable>Yes</Observable>
+        <DataType>
+            <Basic>Real</Basic>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>PositionUnit</Identifier>
+        <DisplayName>PositionUnit</DisplayName>
+        <Description>The position unit used for specifying the position of an axis</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <Basic>String</Basic>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>MinimumPosition</Identifier>
+        <DisplayName>Minimum Position</DisplayName>
+        <Description>The minimum position limit of an axis</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <Basic>Real</Basic>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>MaximumPosition</Identifier>
+        <DisplayName>Maximum Position</DisplayName>
+        <Description>The maximum position limit of an axis</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <Basic>Real</Basic>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>MinimumVelocity</Identifier>
+        <DisplayName>Minimum Velocity</DisplayName>
+        <Description>The minimum velocity limit of an axis</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <DataTypeIdentifier>Velocity</DataTypeIdentifier>
+        </DataType>
+    </Property>
+    <Property>
+        <Identifier>MaximumVelocity</Identifier>
+        <DisplayName>Maximum Velocity</DisplayName>
+        <Description>The maximum velocity limit of an axis</Description>
+        <Observable>No</Observable>
+        <DataType>
+            <DataTypeIdentifier>Velocity</DataTypeIdentifier>
+        </DataType>
+    </Property>
+
+    <!-- Data Types -->
+    <DataTypeDefinition>
+        <Identifier>Velocity</Identifier>
+        <DisplayName>Velocity</DisplayName>
+        <Description>A velocity value with a unit</Description>
+        <DataType>
+            <Constrained>
+                <DataType>
+                    <Basic>Real</Basic>
+                </DataType>
+                <Constraints>
+                    <Unit>
+                        <Label>mm/s</Label>
+                        <Factor>0.001</Factor>
+                        <Offset>0</Offset>
+                        <UnitComponent>
+                            <SIUnit>Meter</SIUnit>
+                            <Exponent>1</Exponent>
+                        </UnitComponent>
+                        <UnitComponent>
+                            <SIUnit>Second</SIUnit>
+                            <Exponent>-1</Exponent>
+                        </UnitComponent>
+                    </Unit>
+                </Constraints>
+            </Constrained>
+        </DataType>
+    </DataTypeDefinition>
+
+    <!-- Errors -->
+    <DefinedExecutionError>
+        <Identifier>InvalidAxisIdentifier</Identifier>
+        <DisplayName>Invalid Axis Identifier</DisplayName>
+        <Description>The sent Axis Identifier is not known</Description>
+    </DefinedExecutionError>
+</Feature>
