@@ -1,3 +1,48 @@
+[project]
+name = "sila_cetoni_motioncontrol"
+version = "1.0.0"
+description = "SiLA 2 implementations for CETONI Motioncontrol devices"
+readme = "README.md"
+authors = [
+    { name = "CETONI GmbH", email = "info@cetoni.de" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Healthcare Industry",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+requires-python = ">=3.7"
+dependencies = [
+    "black",
+    "coloredlogs",
+    "isort",
+    # only for debugging the AxisSystemPositionController's positioning shape
+    # matplotlib
+    # most recent numpy has an issue with fmod on Windows 10 (2004)
+    # see https://developercommunity.visualstudio.com/t/fmod-after-an-update-to-windows-2004-is-causing-a/1207405
+    "numpy==1.19.3",
+    "shapely",
+    "sila2==0.5.5",
+]
+
+[project.scripts]
+sila-cetoni = "sila_cetoni.motioncontrol:main"
+
+[project.urls]
+"Homepage" = "https://cetoni.de/cobomation/#sila"
+"SiLA Standard" = "https://sila-standard.org"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.package-data]
+"*" = ["*.sila.xml"]
+
 [build-system]
 requires = [
     "setuptools>=42",
