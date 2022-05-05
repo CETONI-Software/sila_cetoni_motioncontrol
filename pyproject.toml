@@ -18,9 +18,7 @@ classifiers = [
 
 requires-python = ">=3.7"
 dependencies = [
-    "black",
     "coloredlogs",
-    "isort",
     # only for debugging the AxisSystemPositionController's positioning shape
     # matplotlib
     # most recent numpy has an issue with fmod on Windows 10 (2004)
@@ -28,6 +26,12 @@ dependencies = [
     "numpy==1.19.3",
     "shapely",
     "sila2==0.5.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "isort",
 ]
 
 [project.scripts]
