@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+import "SiLAFramework.proto";
+
+package sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1;
+
+/* Allows to control the position of an axis system */
+service AxisSystemPositionController {
+  /* Move the axis system to the given position with a certain velocity */
+  rpc MoveToPosition (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Parameters) returns (sila2.org.silastandard.CommandConfirmation) {}
+  /* Monitor the state of MoveToPosition */
+  rpc MoveToPosition_Info (sila2.org.silastandard.CommandExecutionUUID) returns (stream sila2.org.silastandard.ExecutionInfo) {}
+  /* Retrieve result of MoveToPosition */
+  rpc MoveToPosition_Result(sila2.org.silastandard.CommandExecutionUUID) returns (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToPosition_Responses) {}
+  /* Move the axis system to its home position. The axis system should manage the order of the movement and should know how to move all axes into a home state. */
+  rpc MoveToHomePosition (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.MoveToHomePosition_Responses) {}
+  /* Immediately stops all movement of the axis system */
+  rpc StopMoving (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.StopMoving_Responses) {}
+  /* The current XY position of the axis system */
+  rpc Subscribe_Position (sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Parameters) returns (stream sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.Subscribe_Position_Responses) {}
+}
+
+/* An (X, Y) position vector */
+message DataType_Position {
+  message Position_Struct {
+    sila2.org.silastandard.Real X = 1;  /* The X component of the position */
+    sila2.org.silastandard.Real Y = 2;  /* The Y component of the position */
+  }
+  sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position.Position_Struct Position = 1;  /* An (X, Y) position vector */
+}
+
+/* Parameters for MoveToPosition */
+message MoveToPosition_Parameters {
+  sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position Position = 1;  /* The position to move to */
+  sila2.org.silastandard.Integer Velocity = 2;  /* An integer value between 0 (exclusive) and 100 (inclusive) defining the relative speed at which all axes of the axis system should move. The velocity value is multiplied with the maximum velocity value of each axis. So a value of 100 means, all axes travel with their maximum velocity. A value of 50 means, all axes travel with the half of the maximum velocity. */
+}
+
+/* Responses of MoveToPosition */
+message MoveToPosition_Responses {
+}
+
+/* Parameters for MoveToHomePosition */
+message MoveToHomePosition_Parameters {
+}
+
+/* Responses of MoveToHomePosition */
+message MoveToHomePosition_Responses {
+}
+
+/* Parameters for StopMoving */
+message StopMoving_Parameters {
+}
+
+/* Responses of StopMoving */
+message StopMoving_Responses {
+}
+
+/* Parameters for Position */
+message Subscribe_Position_Parameters {
+}
+
+/* Responses of Position */
+message Subscribe_Position_Responses {
+  sila2.de.cetoni.motioncontrol.axis.axissystempositioncontroller.v1.DataType_Position Position = 1;  /* The current XY position of the axis system */
+}

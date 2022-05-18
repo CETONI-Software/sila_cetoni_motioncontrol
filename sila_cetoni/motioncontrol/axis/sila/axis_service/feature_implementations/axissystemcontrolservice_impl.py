@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
+from sila2.server import MetadataDict, SilaServer
 
 from sila_cetoni.application.config import Config
 
@@ -28,8 +29,8 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
     __config: Config
     __stop_event: Event
 
-    def __init__(self, axis_system: AxisSystem, executor: Executor):
-        super().__init__()
+    def __init__(self, server: SilaServer, axis_system: AxisSystem, executor: Executor):
+        super().__init__(server)
         self.__axis_system = axis_system
         self.__axes = {
             self.__axis_system.get_axis_device(i).get_device_name(): self.__axis_system.get_axis_device(i)
@@ -96,16 +97,16 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         """
         return [axis_name for axis_name, axis in self.__axes.items() if axis.is_in_fault_state()]
 
-    def get_AvailableAxes(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> List[str]:
+    def get_AvailableAxes(self, *, metadata: MetadataDict) -> List[str]:
         return self.__axes.keys()
 
-    def EnableAxisSystem(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> EnableAxisSystem_Responses:
+    def EnableAxisSystem(self, *, metadata: MetadataDict) -> EnableAxisSystem_Responses:
         self.__axis_system.enable(True)
 
-    def DisableAxisSystem(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> DisableAxisSystem_Responses:
+    def DisableAxisSystem(self, *, metadata: MetadataDict) -> DisableAxisSystem_Responses:
         self.__axis_system.enable(False)
 
-    def ClearFaultState(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> ClearFaultState_Responses:
+    def ClearFaultState(self, *, metadata: MetadataDict) -> ClearFaultState_Responses:
         for axis in self.__axes.values():
             axis.clear_fault()
 

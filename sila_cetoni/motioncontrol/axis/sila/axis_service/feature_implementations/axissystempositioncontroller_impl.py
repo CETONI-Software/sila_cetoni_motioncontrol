@@ -16,7 +16,7 @@ from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
 from sila2.framework.command.execution_info import CommandExecutionStatus
 from sila2.framework.errors.validation_error import ValidationError
-from sila2.server import ObservableCommandInstance
+from sila2.server import MetadataDict, ObservableCommandInstance, SilaServer
 
 from ..generated.axissystempositioncontroller import (
     AxisSystemPositionControllerBase,
@@ -43,8 +43,10 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
     __axes: Dict[str, Axis]
     __stop_event: Event
 
-    def __init__(self, axis_system: AxisSystem, device_properties: Dict[str, Any], executor: Executor):
-        super().__init__()
+    def __init__(
+        self, server: SilaServer, axis_system: AxisSystem, device_properties: Dict[str, Any], executor: Executor
+    ):
+        super().__init__(server)
         self.__axis_system = axis_system
         self.__axes = {
             self.__axis_system.get_axis_device(i).get_device_name(): self.__axis_system.get_axis_device(i)
@@ -154,10 +156,10 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
 
             return geom.Polygon(ops.linemerge([left_bound, inner_arc, outer_arc, right_bound]))
 
-    def MoveToHomePosition(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> MoveToHomePosition_Responses:
+    def MoveToHomePosition(self, *, metadata: MetadataDict) -> MoveToHomePosition_Responses:
         self.__axis_system.find_home()
 
-    def StopMoving(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> StopMoving_Responses:
+    def StopMoving(self, *, metadata: MetadataDict) -> StopMoving_Responses:
         self.__axis_system.stop_move()
 
     def _validate(self, point: geom.Point):
@@ -186,7 +188,7 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         Position: Position,
         Velocity: int,
         *,
-        metadata: Dict[FullyQualifiedIdentifier, Any],
+        metadata: MetadataDict,
         instance: ObservableCommandInstance,
     ) -> MoveToPosition_Responses:
         logger.debug(f"Position: {Position}, Vel: {Velocity}")

@@ -37,10 +37,10 @@ class Server(IOServer):
             server_uuid=server_uuid,
         )
 
-        self.axispositioncontroller = AxisPositionControllerImpl(axis_system, self.child_task_executor)
-        self.axissystemcontrolservice = AxisSystemControlServiceImpl(axis_system, self.child_task_executor)
+        self.axispositioncontroller = AxisPositionControllerImpl(self, axis_system, self.child_task_executor)
+        self.axissystemcontrolservice = AxisSystemControlServiceImpl(self, axis_system, self.child_task_executor)
         self.axissystempositioncontroller = AxisSystemPositionControllerImpl(
-            axis_system, device_properties, self.child_task_executor
+            self, axis_system, device_properties, self.child_task_executor
         )
 
         self.set_feature_implementation(AxisPositionControllerFeature, self.axispositioncontroller)

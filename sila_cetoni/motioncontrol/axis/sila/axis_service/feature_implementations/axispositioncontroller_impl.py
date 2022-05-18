@@ -9,10 +9,10 @@ from threading import Event
 from typing import Any, Dict, List, Optional, Union
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
-from sila2.framework import Command, Feature, FullyQualifiedIdentifier, Property
+from sila2.framework import Command, Feature, FullyQualifiedIdentifier, Metadata, Property
 from sila2.framework.command.execution_info import CommandExecutionStatus
 from sila2.framework.errors.validation_error import ValidationError
-from sila2.server import ObservableCommandInstance
+from sila2.server import MetadataDict, ObservableCommandInstance, SilaServer
 
 from ..generated.axispositioncontroller import (
     AxisPositionControllerBase,
@@ -30,18 +30,18 @@ logger = logging.getLogger(__name__)
 class AxisPositionControllerImpl(AxisPositionControllerBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
-    __axis_id_identifier: FullyQualifiedIdentifier
+    __axis_id_metadata: Metadata
     __value_queues: Dict[str, Queue[float]]  # same keys and number of items and order as `__axes`
     __stop_event: Event
 
-    def __init__(self, axis_system: AxisSystem, executor: Executor):
-        super().__init__()
+    def __init__(self, server: SilaServer, axis_system: AxisSystem, executor: Executor):
+        super().__init__(server)
         self.__axis_system = axis_system
         self.__axes = {
             self.__axis_system.get_axis_device(i).get_device_name(): self.__axis_system.get_axis_device(i)
             for i in range(self.__axis_system.get_axes_count())
         }
-        self.__axis_id_identifier = AxisPositionControllerFeature["AxisIdentifier"].fully_qualified_identifier
+        self.__axis_id_metadata = AxisPositionControllerFeature["AxisIdentifier"]
 
         for name, axis in self.__axes.items():
             unit = axis.get_position_unit()
@@ -71,11 +71,11 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
 
         return update_position
 
-    def _get_axis(self, metadata: Dict[FullyQualifiedIdentifier, Any]) -> Axis:
+    def _get_axis(self, metadata: MetadataDict) -> Axis:
         """
         Retrieves the axis that is requested by the `metadata`
         """
-        axis_identifier: str = metadata.pop(self.__axis_id_identifier)
+        axis_identifier: str = metadata[self.__axis_id_metadata]
         logger.debug(f"axis id: {axis_identifier}")
         try:
             return self.__axes[axis_identifier]
@@ -84,24 +84,24 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
                 message=f"The sent Axis Identifier '{axis_identifier}' is invalid. Valid identifiers are: {self.__axes.keys()}."
             )
 
-    def get_PositionUnit(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> str:
+    def get_PositionUnit(self, *, metadata: MetadataDict) -> str:
         unit = self._get_axis(metadata).get_position_unit()
         return (unit.prefix.name if unit.prefix.name != "unit" else "") + unit.unitid.name
 
-    def get_MinimumPosition(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> float:
+    def get_MinimumPosition(self, *, metadata: MetadataDict) -> float:
         return self._get_axis(metadata).get_position_min()
 
-    def get_MaximumPosition(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> float:
+    def get_MaximumPosition(self, *, metadata: MetadataDict) -> float:
         return self._get_axis(metadata).get_position_max()
 
-    def get_MinimumVelocity(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> Velocity:
+    def get_MinimumVelocity(self, *, metadata: MetadataDict) -> Velocity:
         return 0
 
-    def get_MaximumVelocity(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> Velocity:
+    def get_MaximumVelocity(self, *, metadata: MetadataDict) -> Velocity:
         return self._get_axis(metadata).get_velocity_max()
 
-    def Position_on_subscription(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> Optional[Queue[float]]:
-        axis_identifier: str = metadata.pop(self.__axis_id_identifier)
+    def Position_on_subscription(self, *, metadata: MetadataDict) -> Optional[Queue[float]]:
+        axis_identifier: str = metadata[self.__axis_id_metadata]
         try:
             return self.__value_queues[axis_identifier]
         except IndexError:
@@ -109,7 +109,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
                 message=f"The sent Axis Identifier '{axis_identifier}' is invalid. Valid identifiers are: {self.__axes.keys()}.",
             )
 
-    def MoveToHomePosition(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> MoveToHomePosition_Responses:
+    def MoveToHomePosition(self, *, metadata: MetadataDict) -> MoveToHomePosition_Responses:
         axis = self._get_axis(metadata)
         axis_name = axis.get_device_name()
         axis.find_home()
@@ -121,7 +121,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             is_moving = not axis.is_homing_position_attained()
         logger.info(f"MoveToHomePosition for {axis_name} done")
 
-    def StopMoving(self, *, metadata: Dict[FullyQualifiedIdentifier, Any]) -> StopMoving_Responses:
+    def StopMoving(self, *, metadata: MetadataDict) -> StopMoving_Responses:
         self._get_axis(metadata).stop_move()
 
     def _validate(self, axis: Axis, position: float, velocity: Velocity):
@@ -146,7 +146,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         Position: float,
         Velocity: Velocity,
         *,
-        metadata: Dict[FullyQualifiedIdentifier, Any],
+        metadata: MetadataDict,
         instance: ObservableCommandInstance,
     ) -> MoveToPosition_Responses:
         axis = self._get_axis(metadata)

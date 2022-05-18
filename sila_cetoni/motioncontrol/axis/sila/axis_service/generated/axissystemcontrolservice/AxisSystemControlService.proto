@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+import "SiLAFramework.proto";
+
+package sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1;
+
+/* Provides functionality to observe and control the state of an axis system */
+service AxisSystemControlService {
+  /* Set all axes of the axis system into enabled state */
+  rpc EnableAxisSystem (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.EnableAxisSystem_Responses) {}
+  /* Set all axes of the axis system into disabled state */
+  rpc DisableAxisSystem (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.DisableAxisSystem_Responses) {}
+  /* Clears the fault condition of all axes. This is some kind of error acknowledge that clears the last fault and sets the device in an error-free state. */
+  rpc ClearFaultState (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearFaultState_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.ClearFaultState_Responses) {}
+  /* The names of the individual axes of the axis system. */
+  rpc Get_AvailableAxes (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Parameters) returns (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Get_AvailableAxes_Responses) {}
+  /* The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis system can move. */
+  rpc Subscribe_AxisSystemState (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Parameters) returns (stream sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxisSystemState_Responses) {}
+  /* Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling ClearFaultState. */
+  rpc Subscribe_AxesInFaultState (sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxesInFaultState_Parameters) returns (stream sila2.de.cetoni.motioncontrol.axis.axissystemcontrolservice.v1.Subscribe_AxesInFaultState_Responses) {}
+}
+
+/* Parameters for EnableAxisSystem */
+message EnableAxisSystem_Parameters {
+}
+
+/* Responses of EnableAxisSystem */
+message EnableAxisSystem_Responses {
+}
+
+/* Parameters for DisableAxisSystem */
+message DisableAxisSystem_Parameters {
+}
+
+/* Responses of DisableAxisSystem */
+message DisableAxisSystem_Responses {
+}
+
+/* Parameters for ClearFaultState */
+message ClearFaultState_Parameters {
+}
+
+/* Responses of ClearFaultState */
+message ClearFaultState_Responses {
+}
+
+/* Parameters for AvailableAxes */
+message Get_AvailableAxes_Parameters {
+}
+
+/* Responses of AvailableAxes */
+message Get_AvailableAxes_Responses {
+  repeated sila2.org.silastandard.String AvailableAxes = 1;  /* The names of the individual axes of the axis system. */
+}
+
+/* Parameters for AxisSystemState */
+message Subscribe_AxisSystemState_Parameters {
+}
+
+/* Responses of AxisSystemState */
+message Subscribe_AxisSystemState_Responses {
+  sila2.org.silastandard.String AxisSystemState = 1;  /* The current state of the axis system. This is either 'Enabled' or 'Disabled'. Only if the state is 'Enabled', the axis system can move. */
+}
+
+/* Parameters for AxesInFaultState */
+message Subscribe_AxesInFaultState_Parameters {
+}
+
+/* Responses of AxesInFaultState */
+message Subscribe_AxesInFaultState_Responses {
+  repeated sila2.org.silastandard.String AxesInFaultState = 1;  /* Returns all axes of the system that are currently in fault state. The fault state of all axes can be cleared by calling ClearFaultState. */
+}
