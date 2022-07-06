@@ -18,6 +18,8 @@ Types of changes
 
 ## Unreleased
 
+### Changed
+- Bump sila2 to v0.8.2
 
 ## v1.0.0
 
