@@ -10,8 +10,8 @@ from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
 from sila2.server import MetadataDict, SilaServer
 
-from sila_cetoni.application.system import ApplicationSystem
 from sila_cetoni.application.config import Config
+from sila_cetoni.application.system import ApplicationSystem
 
 from ..generated.axissystemcontrolservice import (
     AxisSystemControlServiceBase,
