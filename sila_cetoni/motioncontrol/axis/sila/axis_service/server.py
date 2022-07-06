@@ -13,7 +13,7 @@ from .generated.axissystemcontrolservice import AxisSystemControlServiceFeature
 from .generated.axissystempositioncontroller import AxisSystemPositionControllerFeature
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class Server(IOServer):
