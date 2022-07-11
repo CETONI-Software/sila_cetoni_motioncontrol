@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
@@ -11,7 +13,6 @@ from .feature_implementations.axissystempositioncontroller_impl import AxisSyste
 from .generated.axispositioncontroller import AxisPositionControllerFeature
 from .generated.axissystemcontrolservice import AxisSystemControlServiceFeature
 from .generated.axissystempositioncontroller import AxisSystemPositionControllerFeature
-
 
 __version__ = "1.1.0"
 
