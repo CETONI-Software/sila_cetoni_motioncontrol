@@ -10,7 +10,7 @@ from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import FullyQualifiedIdentifier
 from sila2.server import MetadataDict, SilaServer
 
-from sila_cetoni.application.config import Config
+from sila_cetoni.application.server_configuration import ServerConfiguration
 from sila_cetoni.application.system import ApplicationSystem
 
 from ..generated.axissystemcontrolservice import (
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
-    __config: Config
+    __config: ServerConfiguration
     __stop_event: Event
 
     def __init__(self, server: SilaServer, axis_system: AxisSystem, executor: Executor):
@@ -38,7 +38,9 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
             for i in range(self.__axis_system.get_axes_count())
         }
 
-        self.__config = Config(self.__axis_system.get_device_name(), ApplicationSystem().device_config.name)
+        self.__config = ServerConfiguration(
+            self.__axis_system.get_device_name(), ApplicationSystem().device_config.name
+        )
         self.__stop_event = Event()
 
         self._restore_last_position_counters()
