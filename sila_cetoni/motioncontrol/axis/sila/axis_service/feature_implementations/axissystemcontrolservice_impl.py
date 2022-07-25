@@ -38,9 +38,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
             for i in range(self.__axis_system.get_axes_count())
         }
 
-        self.__config = ServerConfiguration(
-            self.__axis_system.get_device_name(), ApplicationSystem().device_config.name
-        )
+        self.__config = ServerConfiguration(self.parent_server.server_name, ApplicationSystem().device_config.name)
         self.__stop_event = Event()
 
         self._restore_last_position_counters()
