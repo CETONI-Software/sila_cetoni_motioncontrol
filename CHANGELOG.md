@@ -18,6 +18,10 @@ Types of changes
 
 ## Unreleased
 
+## v1.2.0
+
+Sync with sila_cetoni v1.2.0
+
 ### Changed
 
 - Use the server name as th name for `ServerConfiguration`

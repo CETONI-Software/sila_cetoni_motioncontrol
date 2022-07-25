@@ -14,7 +14,7 @@ from .generated.axispositioncontroller import AxisPositionControllerFeature
 from .generated.axissystemcontrolservice import AxisSystemControlServiceFeature
 from .generated.axissystempositioncontroller import AxisSystemPositionControllerFeature
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 class Server(IOServer):
