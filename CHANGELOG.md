@@ -18,10 +18,14 @@ Types of changes
 
 ## Unreleased
 
+### Changed
+
+- Use the server name as th name for `ServerConfiguration`
 
 ## v1.1.0
 
 ### Changed
+
 - Bump sila2 to v0.8.2
 
 ## v1.0.0
@@ -31,6 +35,7 @@ First release of sila_cetoni
 This is the motioncontrol plugin which adds support for controlling CETONI axis system devices via SiLA 2
 
 ### Added
+
 - AxisPositionController feature and feature implementation
 - AxisSystemControlService feature and feature implementation
 - AxisSystemPositionController feature and feature implementation
