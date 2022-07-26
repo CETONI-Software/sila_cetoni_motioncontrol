@@ -18,6 +18,14 @@ Types of changes
 
 ## Unreleased
 
+## v1.3.0
+
+Sync with sila_cetoni v1.3.0
+
+### Fixed
+
+- Properly call `super().stop()` in the feature implementation classes
+
 ## v1.2.0
 
 Sync with sila_cetoni v1.2.0
