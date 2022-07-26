@@ -37,11 +37,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
             self.__axis_system.get_axis_device(i).get_device_name(): self.__axis_system.get_axis_device(i)
             for i in range(self.__axis_system.get_axes_count())
         }
-
-        self.__config = ServerConfiguration(self.parent_server.server_name, ApplicationSystem().device_config.name)
         self.__stop_event = Event()
-
-        self._restore_last_position_counters()
 
         def update_axis_system_state(stop_event: Event):
             new_is_enabled = is_enabled = self._is_all_axes_enabled()
@@ -67,6 +63,17 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
 
         executor.submit(update_axis_system_state, self.__stop_event)
         executor.submit(update_axes_in_fault_state, self.__stop_event)
+
+    def start(self) -> None:
+        self.__config = ServerConfiguration(self.parent_server.server_name, ApplicationSystem().device_config.name)
+        self._restore_last_position_counters()
+        super().start()
+
+    def stop(self) -> None:
+        super().stop()
+        self.__stop_event.set()
+        self.__config.axis_position_counters = {name: axis.get_position_counter() for name, axis in self.__axes.items()}
+        self.__config.write()
 
     def _restore_last_position_counters(self):
         """
