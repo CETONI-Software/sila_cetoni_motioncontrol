@@ -223,4 +223,5 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         logger.info("Finished moving!")
 
     def stop(self) -> None:
+        super().stop()
         self.__stop_event.set()

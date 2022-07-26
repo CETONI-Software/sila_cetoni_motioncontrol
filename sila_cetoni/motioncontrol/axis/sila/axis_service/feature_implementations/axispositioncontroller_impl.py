@@ -177,4 +177,5 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         return [AxisPositionControllerFeature]
 
     def stop(self) -> None:
+        super().stop()
         self.__stop_event.set()

@@ -112,6 +112,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
             axis.clear_fault()
 
     def stop(self) -> None:
+        super().stop()
         self.__stop_event.set()
         self.__config.axis_position_counters = {name: axis.get_position_counter() for name, axis in self.__axes.items()}
         self.__config.write()
