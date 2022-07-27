@@ -128,18 +128,24 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         min_position = axis.get_position_min()
         max_position = axis.get_position_max()
         if position < min_position or position > max_position:
-            raise ValidationError(
-                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[0],
-                f"The given position {position} is not in the valid range {min_position, max_position} for this axis.",
+            err = ValidationError(
+                f"The given position {position} is not in the valid range {min_position, max_position} for this axis."
             )
+            err.parameter_fully_qualified_identifier = (
+                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[0].fully_qualified_identifier
+            )
+            raise err
 
         min_velocity = 0
         max_velocity = axis.get_velocity_max()
         if velocity < min_velocity or velocity > max_velocity:
-            raise ValidationError(
-                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[1],
-                f"The given velocity {velocity} is not in the valid range {min_velocity, max_velocity} for this axis.",
+            err = ValidationError(
+                f"The given velocity {velocity} is not in the valid range {min_velocity, max_velocity} for this axis."
             )
+            err.parameter_fully_qualified_identifier = (
+                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[1].fully_qualified_identifier
+            )
+            raise err
 
     def MoveToPosition(
         self,

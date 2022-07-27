@@ -177,11 +177,14 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         if not point.within(self.positioning_shape):
             nearest_point, dummy = ops.nearest_points(self.positioning_shape, point)
             logger.debug(f"nearest: {nearest_point}, other: {dummy}")
-            raise ValidationError(
-                AxisSystemPositionControllerFeature["MoveToPosition"].parameters.fields[0],
+            err = ValidationError(
                 f"The given Position {point.x, point.y} is not within the valid positioning range for the axis "
-                f"system! The nearest valid position is ({nearest_point.x:.2f}, {nearest_point.y:.2f}).",
+                f"system! The nearest valid position is ({nearest_point.x:.2f}, {nearest_point.y:.2f})."
             )
+            err.parameter_fully_qualified_identifier = (
+                AxisSystemPositionControllerFeature["MoveToPosition"].parameters.fields[0].fully_qualified_identifier
+            )
+            raise err
 
     def MoveToPosition(
         self,
