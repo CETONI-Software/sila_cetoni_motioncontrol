@@ -18,6 +18,14 @@ Types of changes
 
 ## Unreleased
 
+## v1.4.0
+
+Sync with sila_cetoni v1.4.0
+
+### Fixed
+
+- Raising of `ValidationError`s works again
+
 ## v1.3.0
 
 Sync with sila_cetoni v1.3.0
