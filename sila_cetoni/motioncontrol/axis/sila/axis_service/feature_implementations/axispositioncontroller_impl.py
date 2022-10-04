@@ -171,11 +171,8 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             logger.info("Position: %s", axis.get_actual_position())
             is_moving = not axis.is_target_position_reached()
 
-        if not is_moving:
-            instance.status = CommandExecutionStatus.finishedSuccessfully
-        else:
-            instance.status = CommandExecutionStatus.finishedWithError
-            logger.error("An unexpected error occurred: %s", axis.read_last_error())
+        if is_moving:
+            raise RuntimeError(f"An unexpected error occurred: {axis.read_last_error()}")
 
         logger.info("Finished moving!")
 
