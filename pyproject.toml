@@ -1,6 +1,6 @@
 [project]
 name = "sila_cetoni_motioncontrol"
-version = "1.7.0"
+version = "1.7.1"
 description = "SiLA 2 implementations for CETONI Motioncontrol devices"
 readme = "README.md"
 authors = [
@@ -25,7 +25,7 @@ dependencies = [
     # see https://developercommunity.visualstudio.com/t/fmod-after-an-update-to-windows-2004-is-causing-a/1207405
     "numpy==1.19.3",
     "shapely",
-    "sila2[codegen]==0.10.0
+    "sila2[codegen]==0.10.0",
 ]
 
 [project.optional-dependencies]

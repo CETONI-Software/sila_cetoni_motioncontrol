@@ -18,9 +18,17 @@ Types of changes
 
 ## Unreleased
 
+Sync with sila2 v1.7.1 release
+
+## v1.7.1
+
+### Fixed
+
+- Typo in pyproject.toml
+
 ## v1.7.0
 
-Synch with sila_cetoni v1.7.0
+Sync with sila_cetoni v1.7.0
 
 ### Changed
 
