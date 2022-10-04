@@ -18,6 +18,14 @@ Types of changes
 
 ## Unreleased
 
+## v1.7.0
+
+Synch with sila_cetoni v1.7.0
+
+### Changed
+
+- Bump required sila2 version to v0.10.0
+
 ## v1.6.0
 
 Sync with sila_cetoni v1.6.0
