@@ -18,9 +18,9 @@ Types of changes
 
 ## Unreleased
 
-Sync with sila2 v1.7.1 release
-
 ## v1.7.1
+
+Sync with sila_cetoni v1.7.1 release
 
 ### Fixed
 
