@@ -25,7 +25,7 @@ dependencies = [
     # see https://developercommunity.visualstudio.com/t/fmod-after-an-update-to-windows-2004-is-causing-a/1207405
     "numpy==1.19.3",
     "shapely",
-    "sila2[codegen]==0.10.0",
+    "sila2[codegen]==0.10.1",
 ]
 
 [project.optional-dependencies]
