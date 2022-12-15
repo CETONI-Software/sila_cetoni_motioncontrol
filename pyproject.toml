@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "coloredlogs",
     # only for debugging the AxisSystemPositionController's positioning shape

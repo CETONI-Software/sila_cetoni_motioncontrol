@@ -21,6 +21,7 @@ Types of changes
 ### Changed
 
 - Bump required sila2 version to v0.10.1
+- Increase required Python version to 3.8 because in 3.7 the implementation of `ThreadPoolExecutor` in the standard library does not reuse idle threads leading to an ever increasing number of threads which eventually causes blocking of the server(s) on Raspberry Pis
 
 ## v1.7.1
 
