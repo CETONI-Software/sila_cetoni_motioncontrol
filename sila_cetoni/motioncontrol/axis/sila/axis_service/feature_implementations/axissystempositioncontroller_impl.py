@@ -198,10 +198,6 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         self._validate(geom.Point(Position.X, Position.Y))
         self.__axis_system.stop_move()
 
-        # send first info immediately
-        instance.status = CommandExecutionStatus.running
-        instance.progress = 0
-
         try:
             self.__axis_system.move_to_postion_xy(Position.X, Position.Y, Velocity / 100)
         except DeviceError as err:

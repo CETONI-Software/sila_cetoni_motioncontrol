@@ -158,10 +158,6 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
         axis = self._get_axis(metadata)
         self._validate(axis, Position, Velocity)
 
-        # send first info immediately
-        instance.status = CommandExecutionStatus.running
-        instance.progress = 0
-
         axis.move_to_position(Position, Velocity)
         logger.info(f"Started moving to {Position} with velocity of {Velocity}")
 
