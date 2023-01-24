@@ -18,6 +18,10 @@ Types of changes
 
 ## Unreleased
 
+### Changed
+
+- Don't set the Command Execution status explicitly - this is done by sila_python
+
 ## v1.8.0
 
 Sync with sila_cetoni v1.8.0 release
