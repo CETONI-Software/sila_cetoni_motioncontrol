@@ -14,8 +14,6 @@ from .generated.axispositioncontroller import AxisPositionControllerFeature
 from .generated.axissystemcontrolservice import AxisSystemControlServiceFeature
 from .generated.axissystempositioncontroller import AxisSystemPositionControllerFeature
 
-__version__ = "1.8.0"
-
 
 class Server(IOServer):
     def __init__(
@@ -30,6 +28,8 @@ class Server(IOServer):
         server_vendor_url: str = "",
         server_uuid: Optional[Union[str, UUID]] = None,
     ):
+        from .... import __version__
+
         super().__init__(
             io_channels,
             server_name=server_name or "Axis Service",

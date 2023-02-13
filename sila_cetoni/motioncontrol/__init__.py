@@ -7,11 +7,14 @@ if TYPE_CHECKING:
     from sila_cetoni.application.application_configuration import ApplicationConfiguration
     from sila_cetoni.application.cetoni_device_configuration import CetoniDeviceConfiguration
 
-from qmixsdk import qmixbus, qmixmotion
+from qmixsdk import qmixmotion
 
 from sila_cetoni.application.device import CetoniDevice
+from sila_cetoni.utils import get_version
 
 from .axis.sila.axis_service.server import Server
+
+__version__ = get_version(__name__)
 
 logger = logging.getLogger(__name__)
 
