@@ -7,12 +7,13 @@ if TYPE_CHECKING:
     from sila_cetoni.application.application_configuration import ApplicationConfiguration
     from sila_cetoni.application.cetoni_device_configuration import CetoniDeviceConfiguration
 
+    from .axis.sila.axis_service.server import Server
+
 from qmixsdk import qmixmotion
 
 from sila_cetoni.application.device import CetoniDevice
 from sila_cetoni.utils import get_version
 
-from .axis.sila.axis_service.server import Server
 
 __version__ = get_version(__name__)
 
@@ -137,6 +138,8 @@ def create_server(device: CetoniAxisSystemDevice, **server_args) -> Server:
     **server_args
         Additional arguments like server name, server UUID to pass to the server's `__init__` function
     """
+    from .axis.sila.axis_service.server import Server
+
     logger.info(f"Creating server for {device}")
     return Server(
         axis_system=device.device_handle,
