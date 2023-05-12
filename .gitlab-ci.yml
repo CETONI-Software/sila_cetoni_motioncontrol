@@ -1,0 +1,14 @@
+include:
+  - project: cetoni/sila/sila_cetoni
+    ref: develop
+    file:
+      # including this pulls in the 'run' and 'run-dev' jobs that will build packages for only this sub-repo
+      - '.gitlab-ci.yml'
+
+# trigger a new dev build in the parent repo to get a new development version with the changes from this sub-repo
+trigger:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"
+  trigger:
+    project: cetoni/sila/sila_cetoni
+    branch: $CI_COMMIT_BRANCH
