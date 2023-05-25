@@ -34,8 +34,8 @@ dev = [
     "isort",
 ]
 
-[project.scripts]
-sila-cetoni = "sila_cetoni.motioncontrol:main"
+# [project.scripts]
+# sila-cetoni = "sila_cetoni.motioncontrol:main"
 
 [project.urls]
 "Homepage" = "https://cetoni.de/cobomation/#sila"
