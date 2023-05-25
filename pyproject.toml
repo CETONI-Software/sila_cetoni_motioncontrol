@@ -43,7 +43,8 @@ sila-cetoni = "sila_cetoni.motioncontrol:main"
 
 # dynamic version from git
 [tool.setuptools_scm]
-
+# include timestamp for dirty workdir versions
+local_scheme = "node-and-timestamp"
 
 [tool.setuptools]
 package-dir = {"" = "."}
