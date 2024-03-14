@@ -12,3 +12,4 @@ trigger:
   trigger:
     project: cetoni/sila/sila_cetoni
     branch: $CI_COMMIT_BRANCH
+  stage: build
