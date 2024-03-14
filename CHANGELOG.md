@@ -18,6 +18,10 @@ Types of changes
 
 ## Unreleased
 
+## v1.9.1
+
+Sync with sila_cetoni v1.9.1 release
+
 ## v1.9.0
 
 Sync with sila_cetoni v1.9.0 release
