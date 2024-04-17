@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 import logging
-import math
 import time
-from concurrent.futures import Executor
+from functools import partial
 from queue import Queue
-from threading import Event
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import Command, Feature, FullyQualifiedIdentifier, Metadata, Property
-from sila2.framework.command.execution_info import CommandExecutionStatus
 from sila2.framework.errors.validation_error import ValidationError
 from sila2.server import MetadataDict, ObservableCommandInstance, SilaServer
+
+from sila_cetoni.utils import PropertyUpdater, not_close
 
 from ..generated.axispositioncontroller import (
     AxisPositionControllerBase,
@@ -32,9 +31,8 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
     __axes: Dict[str, Axis]
     __axis_id_metadata: Metadata
     __value_queues: Dict[str, Queue[float]]  # same keys and number of items and order as `__axes`
-    __stop_event: Event
 
-    def __init__(self, server: SilaServer, axis_system: AxisSystem, executor: Executor):
+    def __init__(self, server: SilaServer, axis_system: AxisSystem):
         super().__init__(server)
         self.__axis_system = axis_system
         self.__axes = {
@@ -48,28 +46,18 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             unit_string = (unit.prefix.name if unit.prefix.name != "unit" else "") + unit.unitid.name
             logger.debug(f"{name}, {unit_string}")
 
-        self.__stop_event = Event()
-
         self.__value_queues = {}
         for axis_id in self.__axes.keys():
-            self.__value_queues[axis_id] = Queue()
+            queue = Queue()
+            self.__value_queues[axis_id] = queue
 
-            # initial value
-            self.update_Position(self.__axes[axis_id].get_actual_position(), queue=self.__value_queues[axis_id])
-
-            executor.submit(self.__make_position_updater(axis_id), self.__stop_event)
-
-    def __make_position_updater(self, axis_id: str):
-        def update_position(stop_event: Event):
-            new_value = value = self.__axes[axis_id].get_actual_position()
-            while not stop_event.is_set():
-                new_value = self.__axes[axis_id].get_actual_position()
-                if not math.isclose(new_value, value):
-                    value = new_value
-                    self.update_Position(value, queue=self.__value_queues[axis_id])
-                time.sleep(0.1)
-
-        return update_position
+            self.run_periodically(
+                PropertyUpdater(
+                    self.__axes[axis_id].get_actual_position,
+                    not_close,
+                    partial(self.update_Position, queue=queue),
+                )
+            )
 
     def _get_axis(self, metadata: MetadataDict) -> Axis:
         """
@@ -174,7 +162,3 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
 
     def get_calls_affected_by_AxisIdentifier(self) -> List[Union[Feature, Command, Property, FullyQualifiedIdentifier]]:
         return [AxisPositionControllerFeature]
-
-    def stop(self) -> None:
-        super().stop()
-        self.__stop_event.set()

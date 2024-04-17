@@ -4,8 +4,6 @@ import logging
 import math
 import time
 from collections import namedtuple
-from concurrent.futures import Executor
-from threading import Event
 from typing import Any, Dict
 
 import numpy as np
@@ -13,10 +11,10 @@ import shapely.geometry as geom
 import shapely.ops as ops
 from qmixsdk.qmixbus import DeviceError
 from qmixsdk.qmixmotion import Axis, AxisSystem
-from sila2.framework import FullyQualifiedIdentifier
-from sila2.framework.command.execution_info import CommandExecutionStatus
 from sila2.framework.errors.validation_error import ValidationError
 from sila2.server import MetadataDict, ObservableCommandInstance, SilaServer
+
+from sila_cetoni.utils import PropertyUpdater, not_close
 
 from ..generated.axissystempositioncontroller import (
     AxisSystemPositionControllerBase,
@@ -41,11 +39,8 @@ logger = logging.getLogger(__name__)
 class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
-    __stop_event: Event
 
-    def __init__(
-        self, server: SilaServer, axis_system: AxisSystem, device_properties: Dict[str, Any], executor: Executor
-    ):
+    def __init__(self, server: SilaServer, axis_system: AxisSystem, device_properties: Dict[str, Any]):
         super().__init__(server)
         self.__axis_system = axis_system
         self.__axes = {
@@ -74,21 +69,13 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
         except DeviceError:
             pass
 
-        self.__stop_event = Event()
-
-        def update_position(stop_event: Event):
-            new_position = position = self.__axis_system.get_actual_position_xy()
-            while not stop_event.is_set():
-                new_position = self.__axis_system.get_actual_position_xy()
-                if not math.isclose(new_position.x, position.x) or not math.isclose(new_position.y, position.y):
-                    position = new_position
-                    self.update_Position(position)
-                time.sleep(0.1)
-
-        # initial value
-        self.update_Position(self.__axis_system.get_actual_position_xy())
-
-        executor.submit(update_position, self.__stop_event)
+        self.run_periodically(
+            PropertyUpdater(
+                self.__axis_system.get_actual_position_xy,
+                lambda old, new: not_close(old.x, new.x) or not_close(old.y, new.y),
+                self.update_Position,
+            )
+        )
 
     def _create_positioning_shape(self, jib_length):
         """
@@ -217,7 +204,3 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
             raise RuntimeError(f"An unexpected error occurred: {self.__axis_system.read_last_error()}")
 
         logger.info("Finished moving!")
-
-    def stop(self) -> None:
-        super().stop()
-        self.__stop_event.set()
