@@ -50,13 +50,15 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         )
 
     def start(self) -> None:
-        self.__config = ServerConfiguration(self.parent_server.server_name, ApplicationSystem().device_config.name)
+        self.__config = ServerConfiguration(self.parent_server.server_name, ApplicationSystem().device_config.name)  # type: ignore
         self._restore_last_position_counters()
         super().start()
 
     def stop(self) -> None:
         super().stop()
-        self.__config.axis_position_counters = {name: axis.get_position_counter() for name, axis in self.__axes.items()}
+        self.__config["axis_position_counters"] = {
+            name: str(axis.get_position_counter()) for name, axis in self.__axes.items()
+        }
         self.__config.write()
 
     def _restore_last_position_counters(self):
@@ -64,7 +66,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         Reads the last position counters from the server's config file.
         """
         for axis_name in self.__axes.keys():
-            pos_counter = self.__config.axis_position_counters.get(axis_name)
+            pos_counter = self.__config["axis_position_counters"].get(axis_name)
             if pos_counter is not None:
                 logger.debug(f"Restoring position counter: {pos_counter}")
                 self.__axes[axis_name].restore_position_counter(pos_counter)
@@ -90,14 +92,17 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         return [axis_name for axis_name, axis in self.__axes.items() if axis.is_in_fault_state()]
 
     def get_AvailableAxes(self, *, metadata: MetadataDict) -> List[str]:
-        return self.__axes.keys()
+        return list(self.__axes.keys())
 
     def EnableAxisSystem(self, *, metadata: MetadataDict) -> EnableAxisSystem_Responses:
         self.__axis_system.enable(True)
+        return EnableAxisSystem_Responses()
 
     def DisableAxisSystem(self, *, metadata: MetadataDict) -> DisableAxisSystem_Responses:
         self.__axis_system.enable(False)
+        return DisableAxisSystem_Responses()
 
     def ClearFaultState(self, *, metadata: MetadataDict) -> ClearFaultState_Responses:
         for axis in self.__axes.values():
             axis.clear_fault()
+        return ClearFaultState_Responses()

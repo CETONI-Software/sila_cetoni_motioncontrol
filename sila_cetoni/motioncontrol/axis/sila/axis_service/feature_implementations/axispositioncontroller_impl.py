@@ -4,7 +4,7 @@ import logging
 import time
 from functools import partial
 from queue import Queue
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 
 from qmixsdk.qmixmotion import Axis, AxisSystem
 from sila2.framework import Command, Feature, FullyQualifiedIdentifier, Metadata, Property
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class AxisPositionControllerImpl(AxisPositionControllerBase):
     __axis_system: AxisSystem
     __axes: Dict[str, Axis]
-    __axis_id_metadata: Metadata
+    __axis_id_metadata: Metadata[str]
     __value_queues: Dict[str, Queue[float]]  # same keys and number of items and order as `__axes`
 
     def __init__(self, server: SilaServer, axis_system: AxisSystem):
@@ -39,7 +39,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             self.__axis_system.get_axis_device(i).get_device_name(): self.__axis_system.get_axis_device(i)
             for i in range(self.__axis_system.get_axes_count())
         }
-        self.__axis_id_metadata = AxisPositionControllerFeature["AxisIdentifier"]
+        self.__axis_id_metadata = cast(Metadata[str], AxisPositionControllerFeature["AxisIdentifier"])
 
         for name, axis in self.__axes.items():
             unit = axis.get_position_unit()
@@ -108,9 +108,11 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             logger.info("Position: %s (axis: %s)", axis.get_actual_position(), axis_name)
             is_moving = not axis.is_homing_position_attained()
         logger.info(f"MoveToHomePosition for {axis_name} done")
+        return MoveToHomePosition_Responses()
 
     def StopMoving(self, *, metadata: MetadataDict) -> StopMoving_Responses:
         self._get_axis(metadata).stop_move()
+        return StopMoving_Responses()
 
     def _validate(self, axis: Axis, position: float, velocity: Velocity):
         min_position = axis.get_position_min()
@@ -120,7 +122,9 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
                 f"The given position {position} is not in the valid range {min_position, max_position} for this axis."
             )
             err.parameter_fully_qualified_identifier = (
-                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[0].fully_qualified_identifier
+                cast(Command, AxisPositionControllerFeature["MoveToPosition"])
+                .parameters.fields[0]
+                .fully_qualified_identifier
             )
             raise err
 
@@ -131,7 +135,9 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
                 f"The given velocity {velocity} is not in the valid range {min_velocity, max_velocity} for this axis."
             )
             err.parameter_fully_qualified_identifier = (
-                AxisPositionControllerFeature["MoveToPosition"].parameters.fields[1].fully_qualified_identifier
+                cast(Command, AxisPositionControllerFeature["MoveToPosition"])
+                .parameters.fields[1]
+                .fully_qualified_identifier
             )
             raise err
 
@@ -159,6 +165,7 @@ class AxisPositionControllerImpl(AxisPositionControllerBase):
             raise RuntimeError(f"An unexpected error occurred: {axis.read_last_error()}")
 
         logger.info("Finished moving!")
+        return MoveToPosition_Responses()
 
     def get_calls_affected_by_AxisIdentifier(self) -> List[Union[Feature, Command, Property, FullyQualifiedIdentifier]]:
         return [AxisPositionControllerFeature]

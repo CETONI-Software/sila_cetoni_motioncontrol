@@ -4,13 +4,14 @@ import logging
 import math
 import time
 from collections import namedtuple
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 import numpy as np
 import shapely.geometry as geom
 import shapely.ops as ops
 from qmixsdk.qmixbus import DeviceError
 from qmixsdk.qmixmotion import Axis, AxisSystem
+from sila2.framework import Command
 from sila2.framework.errors.validation_error import ValidationError
 from sila2.server import MetadataDict, ObservableCommandInstance, SilaServer
 
@@ -22,9 +23,9 @@ from ..generated.axissystempositioncontroller import (
     MovementBlocked,
     MoveToHomePosition_Responses,
     MoveToPosition_Responses,
-    Position,
-    StopMoving_Responses,
 )
+from ..generated.axissystempositioncontroller import Position as DataTypePosition
+from ..generated.axissystempositioncontroller import StopMoving_Responses
 
 Position = namedtuple("Position", ["X", "Y"])
 
@@ -145,9 +146,11 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
 
     def MoveToHomePosition(self, *, metadata: MetadataDict) -> MoveToHomePosition_Responses:
         self.__axis_system.find_home()
+        return MoveToHomePosition_Responses()
 
     def StopMoving(self, *, metadata: MetadataDict) -> StopMoving_Responses:
         self.__axis_system.stop_move()
+        return StopMoving_Responses()
 
     def _validate(self, point: geom.Point):
         """
@@ -169,7 +172,9 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
                 f"system! The nearest valid position is ({nearest_point.x:.2f}, {nearest_point.y:.2f})."
             )
             err.parameter_fully_qualified_identifier = (
-                AxisSystemPositionControllerFeature["MoveToPosition"].parameters.fields[0].fully_qualified_identifier
+                cast(Command, AxisSystemPositionControllerFeature["MoveToPosition"])
+                .parameters.fields[0]
+                .fully_qualified_identifier
             )
             raise err
 
@@ -204,3 +209,4 @@ class AxisSystemPositionControllerImpl(AxisSystemPositionControllerBase):
             raise RuntimeError(f"An unexpected error occurred: {self.__axis_system.read_last_error()}")
 
         logger.info("Finished moving!")
+        return MoveToPosition_Responses()
