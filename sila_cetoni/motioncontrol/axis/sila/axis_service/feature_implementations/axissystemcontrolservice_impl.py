@@ -66,7 +66,7 @@ class AxisSystemControlServiceImpl(AxisSystemControlServiceBase):
         Reads the last position counters from the server's config file.
         """
         for axis_name in self.__axes.keys():
-            pos_counter = self.__config["axis_position_counters"].get(axis_name)
+            pos_counter = self.__config["axis_position_counters"].getint(axis_name)
             if pos_counter is not None:
                 logger.debug(f"Restoring position counter: {pos_counter}")
                 self.__axes[axis_name].restore_position_counter(pos_counter)
