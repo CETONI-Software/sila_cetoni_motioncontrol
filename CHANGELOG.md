@@ -18,6 +18,10 @@ Types of changes
 
 ## Unreleased
 
+## v1.10.0
+
+Sync with sila_cetoni v1.10.0 release
+
 ### Changed
 
 - All feature implementations use `PropertyUpdater` now
